@@ -1,6 +1,21 @@
+<?php
+session_start();
+if( isset($_SESSION['bLoggedIn']) && isset($_SESSION['jMyUser'])  )
+{
+    $bLoggedIn  = "true";
+    $jMyUser = json_encode($_SESSION['jMyUser']);
+}
+else
+{
+    $bLoggedIn = "false";
+    $jMyUser = json_encode(new stdClass());
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" href="Style/bootstrap.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
     <meta charset="UTF-8">
     <title>Title</title>
     <style>
@@ -17,12 +32,21 @@
 <button class="btnPages" data-page='getGoogleMaps'>Maps</button>
 <button class="btnPages" data-page='getPageProducts'>Products</button>
 <button class="btnPages" data-page='getPageUsers'>Users</button>
+<button class="btnPages" data-page='getPageLogin'>Login</button>
+<button class="btnPages" data-page='getPageLogout'>Logout</button>
+
+
 
 
 <div id="child"></div>
-<div id="map"></div>
 
 <script>
+
+    var jMyUser = <?php echo $jMyUser ?>;
+    var bIsLoggedIn = <?php echo $bLoggedIn?>;
+
+    console.log(jMyUser);
+    console.log(bIsLoggedIn);
 
     document.addEventListener("click",function(e){
         if(e.target.classList.contains("btnPages")) {
@@ -34,8 +58,43 @@
         });
 
 
+
+    function getPageLogout(callback) {
+        doAjax({"method":"GET","url":"api/login/logout.php"},function(){
+            getPageLogin(function(sLoginDiv){
+                callback(sLoginDiv);
+            });
+        });
+    }
+
+    function getPageLogin(callback) {
+        var sLoginDiv = '<div>\
+                  <div id="userInputDiv">\
+                    <form id="frmLogin"> \
+                        <input class="form-control" type="text" name="txtUserEmail" placeholder="User Name">\
+                        <input class="form-control" type="text" name="txtUserPassword" placeholder="User Password">\
+                        <button class="btn btn-success btnPages" type="button" data-page="doLogin">Login</button>\
+                    </form>\
+                  </div>\
+                </div>';
+        callback(sLoginDiv);
+    }
+
+    function doLogin(){
+        var jAjaxData = {};
+        jAjaxData.method = "POST";
+        jAjaxData.url = "api/login/login.php";
+        jAjaxData.form = "frmLogin";
+        doAjax(jAjaxData,function(user){
+            if(user){
+                jMyUser = JSON.parse(user);
+                bIsLoggedIn = true;
+            }
+        });
+    }
+
     function getPageUsers(callback) {
-        doAjax({"method":"GET","url":"api/user/get-users.php?id=59bd13f22fac6"},function(users){
+        doAjax({"method":"GET","url":"api/user/get-users.php?id="+jMyUser.id+""},function(users){
             var ajUsers = JSON.parse(users);
             var sUsersDiv = "";
             for(var i = 0; i < ajUsers.length; i++) {
@@ -113,7 +172,7 @@
         }
         ajax.open( jData.method, jData.url, true );
         if(jData.form){
-            var oFrmUser = new FormData(jData.form);
+            var oFrmUser = new FormData(document.getElementById(jData.form));
             ajax.send(oFrmUser);
         }
         else {
@@ -150,7 +209,7 @@
             });
 
         });
-        callback("<h1>Kortet med alle subscribers</h1>");
+        callback("<h1>Kortet med alle subscribers</h1><div id='map'></div> ");
     }
 
     function initMap(position, callback) {
