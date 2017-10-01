@@ -15,6 +15,7 @@
 <button class='btnPages' data-page='getPageOne'>Page 1</button>
 <button class='btnPages' data-page='getPageTwo'>Page 2</button>
 <button class="btnPages" data-page='getGoogleMaps'>Maps</button>
+<button class="btnPages" data-page='getPageProducts'>Products</button>
 
 <div id="child"></div>
 <div id="map"></div>
@@ -30,6 +31,34 @@
         }
         });
 
+    function getPageProducts(callback) {
+        doAjax({"method":"GET","url":"api/product/get-products.php"}, function (products) {
+            var jProducts = JSON.parse(products);
+            var sProductsDiv = "";
+            for(var i = 0; i < jProducts.length; i++) {
+                var jProduct = jProducts[i];
+                sProductsDiv += generateProductDiv(jProduct)
+            }
+            callback(sProductsDiv)
+        });
+    }
+
+    function generateProductDiv(product) {
+        return '<div>\
+                  <div id="productImageDiv">\
+                    <img width="250px" height="250px" src="'+product.picture+'">\
+                  </div>\
+                  <div id="productInfoDiv">\
+                    <div><span>Name: </span><span>'+product.productName+'</span></div>\
+                    <div><span>Price: </span><span>'+product.productPrice+'</span></div>\
+                    <div><span>Quantity: </span><span>'+product.quantity+'</span></div>\
+                  </div>\
+                  <div id="productOptions" data-id="'+product.id+'">\
+                    <button>Edit</button>\
+                    <button>Delete</button>\
+                  </div>\
+                </div>';
+    }
 
     function getPageOne(callback) {
         var sDiv = "This is page one";
