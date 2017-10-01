@@ -6,7 +6,7 @@
     <style>
         #map {
             height: 400px;
-            width: 50%;
+            width: 400px;
         }
     </style>
 </head>
@@ -16,6 +16,8 @@
 <button class='btnPages' data-page='getPageTwo'>Page 2</button>
 <button class="btnPages" data-page='getGoogleMaps'>Maps</button>
 <button class="btnPages" data-page='getPageProducts'>Products</button>
+<button class="btnPages" data-page='getPageUsers'>Users</button>
+
 
 <div id="child"></div>
 <div id="map"></div>
@@ -30,6 +32,36 @@
             });
         }
         });
+
+
+    function getPageUsers(callback) {
+        doAjax({"method":"GET","url":"api/user/get-users.php?id=59bd13f22fac6"},function(users){
+            var ajUsers = JSON.parse(users);
+            var sUsersDiv = "";
+            for(var i = 0; i < ajUsers.length; i++) {
+                var jUser = ajUsers[i];
+                sUsersDiv += generateUserDiv(jUser);
+            }
+            callback(sUsersDiv);
+        });
+    }
+
+    function generateUserDiv(user) {
+        return '<div>\
+                  <div id="userImageDiv">\
+                    <img width="250px" height="250px" src="Pictures/'+user.picture+'">\
+                  </div>\
+                  <div id="userInfoDiv">\
+                    <div><span>First name: </span><span>'+user.firstName+'</span></div>\
+                    <div><span>Last name: </span><span>'+user.lastName+'</span></div>\
+                    <div><span>E-mail: </span><span>'+user.email+'</span></div>\
+                  </div>\
+                  <div id="userOptions" data-id="'+user.id+'">\
+                    <button>Edit</button>\
+                    <button>Delete</button>\
+                  </div>\
+                </div>';
+    }
 
     function getPageProducts(callback) {
         doAjax({"method":"GET","url":"api/product/get-products.php"}, function (products) {
@@ -46,7 +78,7 @@
     function generateProductDiv(product) {
         return '<div>\
                   <div id="productImageDiv">\
-                    <img width="250px" height="250px" src="'+product.picture+'">\
+                    <img width="250px" height="250px" src="Pictures/'+product.picture+'">\
                   </div>\
                   <div id="productInfoDiv">\
                     <div><span>Name: </span><span>'+product.productName+'</span></div>\

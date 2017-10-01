@@ -13,7 +13,7 @@ for($i = 0; $i < count($ajUsers); $i++) {
         }
         else {
             for($j = 0; $j < count($ajUsers); $j++) {
-                unset($ajUsers[$j]->id);
+                //unset($ajUsers[$j]->id);
                 unset($ajUsers[$j]->password);
             }
             echo json_encode($ajUsers);
