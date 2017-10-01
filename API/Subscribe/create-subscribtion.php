@@ -4,6 +4,11 @@
 $sajSubscribers = file_get_contents('../../JSON/subscribers.txt');
 $ajSubscribers = json_decode($sajSubscribers);
 
+$sUserId = $_POST['txtUserId'];
+
+echo $sUserId;
+
+/*
 //Checks if the subscriber all ready exists in the database
 for($i = 0; $i < count($ajSubscribers); $i++ ){
     if($ajSubscribers[$i]->userId === $_POST['txtUserId']){
@@ -35,5 +40,5 @@ if(!$bExistingUser) {
 
     echo json_encode($jNewSubscriber);
 }
-
+*/
 ?>

@@ -175,6 +175,10 @@ else
             var oFrmUser = new FormData(document.getElementById(jData.form));
             ajax.send(oFrmUser);
         }
+        else if(jData.formData) {
+            console.log(jData.formData);
+            ajax.send(jData.formData);
+        }
         else {
             ajax.send();
         }
@@ -209,7 +213,31 @@ else
             });
 
         });
-        callback("<h1>Kortet med alle subscribers</h1><div id='map'></div> ");
+
+        var sSubscribtionDiv = '<form id="frmSubscribe">\
+                        <button class="btn btn-success btnPages" type="button" data-page="doSubscribtion">Subscribe!</button>\
+                    </form>';
+
+        callback("<h1>Choose your location on the map and click subscribe!</h1><div id='map'></div>" + sSubscribtionDiv);
+    }
+
+    function doSubscribtion(callback){
+
+        var f = document.createElement("form");
+
+        //class="form-control" type="text"
+
+        var i = document.createElement("input"); //input element, text
+        i.setAttribute('name',"txtUserId");
+        i.setAttribute('value',jMyUser.id);
+        i.setAttribute('class',"form-control");
+        i.setAttribute('type',"text");
+        f.appendChild(i);
+
+
+        doAjax({"method":"GET","url":"api/subscribe/create-subscribtion.php", "formData":f},function(data){
+            console.log(data);
+        });
     }
 
     function initMap(position, callback) {
