@@ -22,7 +22,7 @@ $newProduct->id = $sProductId;
 $newProduct->productName = $sProductName;
 $newProduct->productPrice = $sProductPrice;
 $newProduct->quantity = $sProductQuantity;
-$newProduct->picture  = $sProductId.'_'.$sFileName;
+$newProduct->picture  = 'Pictures/'.$sProductId.'_'.$sFileName;
 
 array_push($ajProducts, $newProduct);
 $sajProducts = json_encode($ajProducts);

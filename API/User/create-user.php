@@ -39,7 +39,7 @@ if(!$bExistingUser) {
     $newUser->lastName = $sUserLastName;
     $newUser->email = $sUserEmail;
     $newUser->password = $sUserPassword;
-    $newUser->picture  =$sUserId.'_'.$sFileName;
+    $newUser->picture  = 'Pictures/'.$sUserId.'_'.$sFileName;
 
     array_push($ajUsers, $newUser);
     $sajUsers = json_encode($ajUsers);

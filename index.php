@@ -253,7 +253,7 @@ else
     function generateUserDiv(user) {
         return '<div>\
                   <div id="userImageDiv">\
-                    <img width="250px" height="250px" src="Pictures/'+user.picture+'">\
+                    <img width="250px" height="250px" src="'+user.picture+'">\
                   </div>\
                   <div id="userInfoDiv">\
                     <div><span>First name: </span><span>'+user.firstName+'</span></div>\
@@ -344,7 +344,7 @@ else
 
     function generateProductDiv(product) {
         return '<div class="card">\
-                  <img width="250px" height="250px" src="Pictures/'+product.picture+'">\
+                  <img width="250px" height="250px" src="'+product.picture+'">\
                   <div id="productInfoDiv">\
                     <div><span>Name: </span><span>'+product.productName+'</span></div>\
                     <div><span>Price: </span><span>'+product.productPrice+'</span></div>\
@@ -372,19 +372,18 @@ else
             console.log("HER");
             if(data) {
                 var jBoughtItem = JSON.parse(data);
-                console.log(jBoughtItem.picture);
-                console.log(jBoughtItem.productName);
-                notifycation(jBoughtItem.picture, "You have bought: "+jBoughtItem.productName, "Congratulations");
+                displayNotification(jBoughtItem.picture, "You have bought: "+jBoughtItem.productName, "Congratulations");
+                playSound('Sounds/purchase_success.mp3');
                 getPageProducts(function(sDiv){
                     callback(sDiv);
                 });
             }
             else {
-                notifycation('','Product is not avaible','ERROR');
+                playSound('Sounds/purchase_error.mp3');
+                displayNotification('','Product is not avaible','ERROR');
             }
         });
     }
-
 
     function getProductPage(sId, callback) {
         doAjax({"method":"GET","url":"api/product/get-product.php/?id=" + sId}, function (product) {
@@ -393,7 +392,7 @@ else
                 '<div class="container">\
                     <div class="row">\
                         <div class="col-md-5">\
-                           <img width="100%" src="Pictures/'+jProduct.picture+'"/>\
+                           <img width="100%" src="'+jProduct.picture+'"/>\
                         </div>\
                         <div class="col-md-6">\
                           <div class="row">\
@@ -461,7 +460,7 @@ else
                 '<div class="container">\
                     <div class="row">\
                         <div class="col-md-5">\
-                           <img width="100%" src="Pictures/'+jUser.picture+'"/>\
+                           <img width="100%" src="'+jUser.picture+'"/>\
                         </div>\
                         <div class="col-md-6">\
                           <div class="row">\
@@ -656,16 +655,7 @@ else
         callback();
     }
 
-
-    function displayNotification(sUrl, sItemId){
-        var notification = new Notification("Item bought",{
-            icon: sUrl,
-            body : 'You have bought the item: ' + sItemId,
-            tag : "preset"
-        });
-    }
-
-    function notifycation(sUrl, sItemId, sTitle) {
+    function displayNotification(sUrl, sItemId, sTitle) {
         if (Notification.permission !== "granted") {
             Notification.requestPermission();
         }
@@ -675,6 +665,11 @@ else
                 body: sItemId
             });
         }
+    }
+
+    function playSound(soundPath) {
+        var oSound = new Audio(soundPath);
+        oSound.play();
     }
 
 </script>
