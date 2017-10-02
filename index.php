@@ -79,6 +79,11 @@ else
     document.addEventListener("click",function(e){
         if(e.target.classList.contains("btnPages")) {
             var spText = e.target.getAttribute("data-page");
+            if(e.target.classList.contains('nav-link')){
+                removeActivePage(function(){
+                    e.target.className += ' active';
+                });
+            }
             window[spText](function(data){
                 parentDiv.innerHTML = data;
             });
@@ -114,11 +119,22 @@ else
 
     });
 
+    function removeActivePage(callback){
+        var navElements = document.getElementsByClassName('nav-link');
+        for(var i = 0; i < navElements.length; i++) {
+            navElements[i].classList.remove('active');
+        }
+        callback();
+    }
 
     function getPageLogout(callback) {
         doAjax({"method":"GET","url":"api/login/logout.php"},function(){
             getPageLogin(function(sLoginDiv){
-                callback(sLoginDiv);
+                removeActivePage(function(){
+                    var elements = document.querySelectorAll('[data-page="getPageLogin"]');
+                    elements[0].className += ' active';
+                    callback(sLoginDiv);
+                });
             });
         });
     }
@@ -369,7 +385,6 @@ else
             "formData" : formData
         }
         doAjax(jAjaxData, function(data){
-            console.log("HER");
             if(data) {
                 var jBoughtItem = JSON.parse(data);
                 displayNotification(jBoughtItem.picture, "You have bought: "+jBoughtItem.productName, "Congratulations");
@@ -418,8 +433,8 @@ else
                           </div>\
                           <div class="row product-options">\
                                <div class="col-md-12">\
-                                    <div class="row" style="margin-top: 10px">\
-                                         <button class="col-md-6 btn btn-success">Add to basket</button>\
+                                    <div class="row" style="margin-top: 10px" data-id="'+jProduct.id+'">\
+                                            <button class="col-md-6 btn btn-success btnCrudPages" data-page="buyProduct">Add to basket</button>\
                                     </div>\
                                     <div class="row" style="margin-top: 10px">\
                                         <button class="col-md-3 btn btn-secondary btnEdit" data-api="edit-product" data-id="'+jProduct.id+'" data-method="changeToEditMode">Edit</button>\

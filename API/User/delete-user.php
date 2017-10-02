@@ -8,6 +8,7 @@ $sUserId = $_GET['id'];
 if($sUserId) {
     for ($i = 0; $i < count($ajUsers); $i++) {
         if($sUserId == $ajUsers[$i]->id) {
+            unlink('../../'.$ajUsers[$i]->picture);
             array_splice($ajUsers, $i, 1);
             $bjUserRemoved = true;
         }

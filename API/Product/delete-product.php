@@ -8,6 +8,7 @@ $sProductId = $_GET['id'];
 if($sProductId) {
     for ($i = 0; $i < count($ajProducts); $i++) {
         if($sProductId == $ajProducts[$i]->id) {
+            unlink('../../'.$ajProducts[$i]->picture);
             array_splice($ajProducts, $i, 1);
             $bjProductRemoved = true;
         }
