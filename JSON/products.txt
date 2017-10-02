@@ -1,1 +1,1 @@
-[{"id":"59cf83eb0c645","productName":"nye","productPrice":"100\u20ac","quantity":"71","picture":"Pictures\/nikeshoe.jpg"},{"id":"59cf84eb0c645","productName":"produktet 2","productPrice":"300\u20ac","quantity":100,"picture":"Pictures\/59cf83eb0c645_"}]
+[{"id":"59cf83eb0c645","productName":"nye","productPrice":"100\u20ac","quantity":"72","picture":"Pictures\/nikeshoe.jpg"},{"id":"59cf84eb0c645","productName":"produktet 2","productPrice":"300\u20ac","quantity":100,"picture":"Pictures\/59cf83eb0c645_"}]
