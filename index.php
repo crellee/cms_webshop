@@ -98,8 +98,20 @@ else
         if(e.target.classList.contains("btnUpdate")){
             var spText = e.target.getAttribute("data-method");
             var editTextFields = document.querySelectorAll(".edit-textfield");
-            window[spText](e.target, editTextFields);
+            window[spText](e.target, editTextFields, function(sDiv){
+                parentDiv.innerHTML = sDiv;
+            });
         }
+
+        if(e.target.classList.contains("btnDelete")){
+            var spText = e.target.getAttribute("data-method"); //delete method
+            var sApi = e.target.getAttribute("data-api"); //delete-product
+            var sId = e.target.getAttribute('data-id');
+            window[spText](sId, sApi, function(data){
+                parentDiv.innerHTML = data;
+            });
+        }
+
     });
 
 
@@ -216,6 +228,17 @@ else
 
 
     function getPageUsers(callback) {
+        var sUsersBody =
+            "<div class='container'>\
+                <div class='row' id='usersContent'>\
+                </div>\
+            </div>";
+        callback(sUsersBody);
+        getUserElements(function(users){
+            usersContent.innerHTML = users;
+        });
+    }
+    function getUserElements(callback){
         doAjax({"method":"GET","url":"api/user/get-users.php?id="+jMyUser.id+""},function(users){
             var ajUsers = JSON.parse(users);
             var sUsersDiv = "";
@@ -230,7 +253,7 @@ else
     function generateUserDiv(user) {
         return '<div>\
                   <div id="userImageDiv">\
-                    <img width="250px" height="250px" src="Pictures/'+user.picture+'">\
+                    <img width="250px" height="250px" src="'+user.picture+'">\
                   </div>\
                   <div id="userInfoDiv">\
                     <div><span>First name: </span><span>'+user.firstName+'</span></div>\
@@ -238,8 +261,7 @@ else
                     <div><span>E-mail: </span><span>'+user.email+'</span></div>\
                   </div>\
                   <div id="userOptions" data-id="'+user.id+'">\
-                    <button>Edit</button>\
-                    <button>Delete</button>\
+                    <button class="btnCrudPages" data-page="getUserPage">Show more</button>\
                   </div>\
                 </div>';
     }
@@ -251,10 +273,10 @@ else
                         </div>\
                     </div>";
 
-        callback(productsBody)
+        callback(productsBody);
         getProductElements(function (products) {
             productsContent.innerHTML = products;
-        })
+        });
     }
 
     function getProductElements(callback) {
@@ -322,7 +344,7 @@ else
                                     </div>\
                                     <div class="row" style="margin-top: 10px">\
                                         <button class="col-md-3 btn btn-secondary btnEdit" id="edit-product" data-id="'+jProduct.id+'" data-method="changeToEditMode">Edit</button>\
-                                        <button class="col-md-3 btn btn-danger">Delete</button>\
+                                        <button class="col-md-3 btn btn-danger btnDelete" data-api="delete-product" data-method="deleteObject" data-id="'+jProduct.id+'">Delete</button>\
                                     </div>\
                                </div>\
                           </div>\
@@ -330,6 +352,69 @@ else
                     </div>\
                 </div>';
             callback(productDiv)
+        });
+    }
+
+    function deleteObject(sId, sApi, callback){
+        var sApiDirectory = sApi.split('-')[1];
+        console.log(sApi);
+        console.log(sApiDirectory);
+
+        jAjaxData = {
+            "method" : "GET",
+            "url" : "api/"+sApiDirectory+"/"+sApi+".php/?id="+sId
+        }
+        doAjax(jAjaxData,function(){
+                getPageProducts(function(data){
+                    callback(data);
+                });
+            });
+
+    }
+
+    function getUserPage(sId, callback) {
+        doAjax({"method":"GET","url":"api/user/get-user.php/?id=" + sId}, function (user) {
+            var jUser = JSON.parse(user);
+            var sUserDiv =
+                '<div class="container">\
+                    <div class="row">\
+                        <div class="col-md-5">\
+                           <img width="100%" src="'+jUser.picture+'"/>\
+                        </div>\
+                        <div class="col-md-6">\
+                          <div class="row">\
+                            <div class="col-md-12">\
+                                <h3 class="editable-info" id="txtUserFirstName" style="border-bottom: 1px solid #f2f2f2">'+jUser.firstName+'</h3>\
+                            </div>\
+                          </div>\
+                          <div class="row">\
+                            <div class="col-md-4">\
+                                <p>Last name:</p>\
+                            </div>\
+                            <div class="col-md-6">\
+                                <p class="editable-info" id="txtUserLastName">'+jUser.lastName+'</p>\
+                            </div>\
+                          </div>\
+                          <div class="row">\
+                            <div class="col-md-4">\
+                                <p>Email:</p>\
+                            </div>\
+                            <div class="col-md-6">\
+                                <p class="editable-info" id="txtUserEmail">'+jUser.email+'</p>\
+                            </div>\
+                          </div>\
+                          <div class="row product-options">\
+                               <div class="col-md-12">\
+                                    <div class="row" style="margin-top: 10px">\
+                                        <button class="col-md-3 btn btn-secondary btnEdit" id="edit-user" data-id="'+jUser.id+'" data-method="changeToEditMode">Edit</button>\
+                                        <button class="col-md-3 btn btn-danger">Delete</button>\
+                                    </div>\
+                               </div>\
+                          </div>\
+                        </div>\
+                    </div>\
+                </div>';
+            callback(sUserDiv)
         });
     }
 
@@ -351,18 +436,18 @@ else
         editButtonParentNode.insertAdjacentHTML("afterbegin", updateBtn);
     }
 
-    function updateObject(btn, editTextFields) {
+    function updateObject(btn, editTextFields, callback) {
         var formData = new FormData();
         var btnDataId = btn.getAttribute('data-id');
         var btnId = btn.getAttribute('id');
         var objectToUpdate = btnId.split('-')[1];
+        var sObjectUpper = objectToUpdate.charAt(0).toUpperCase() + objectToUpdate.slice(1);
         for(var i = 0; i < editTextFields.length; i++) {
             var currentField = editTextFields[i];
             var key = currentField.getAttribute('id');
             var value = currentField.value;
             formData.append(key, value);
         }
-
         formData.append('id', btnDataId);
 
         var jAjaxData = {
@@ -370,9 +455,13 @@ else
             "url" : "api/" + objectToUpdate + "/" + btnId  + ".php",
             "formData" : formData
         }
+
         doAjax(jAjaxData, function (data) {
-            console.log('FROM SERVER', data);
-        })
+            console.log(data);
+            window["get"+sObjectUpper+"Page"](btnDataId, function(data){
+                callback(data);
+            });
+        });
     }
 
     function getPageOne(callback) {
