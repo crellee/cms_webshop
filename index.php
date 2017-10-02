@@ -253,7 +253,7 @@ else
     function generateUserDiv(user) {
         return '<div>\
                   <div id="userImageDiv">\
-                    <img width="250px" height="250px" src="'+user.picture+'">\
+                    <img width="250px" height="250px" src="Pictures/'+user.picture+'">\
                   </div>\
                   <div id="userInfoDiv">\
                     <div><span>First name: </span><span>'+user.firstName+'</span></div>\
@@ -269,6 +269,11 @@ else
     function getPageProducts(callback) {
         var productsBody =
                     "<div class='container'>\
+                        <div class='row' style='margin-bottom: 10px; margin-top: 10px'>\
+                            <div class='col-md-12'>\
+                                <button class='btn btn-success btnPages' data-page='getPageAddProduct'>Add product</button>\
+                            </div>\
+                        </div>\
                         <div class='row' id='productsContent'>\
                         </div>\
                     </div>";
@@ -276,6 +281,52 @@ else
         callback(productsBody);
         getProductElements(function (products) {
             productsContent.innerHTML = products;
+        });
+    }
+
+    function getPageAddProduct(callback) {
+       var sDivAddProduct = '<div class="row">\
+       <div class="col-md-6 mx-auto">\
+           <form class="form" id="frmAddProduct">\
+               <h1>Create new product</h1>\
+               <div class="form-group">\
+                   <label for="txtProductName">Product name</label>\
+                   <input type="text" class="form-control" name="txtProductName"  placeholder="Enter product name">\
+               </div>\
+               <div class="form-group">\
+                   <label for="txtProductPrice">Product price</label>\
+                   <input type="text" class="form-control" name="txtProductPrice"  placeholder="Enter product price">\
+               </div>\
+               <div class="form-group">\
+                   <label for="txtProductQuantity">Quantity</label>\
+                   <input type="number" class="form-control" name="txtProductQuantity"  placeholder="Enter quantity">\
+               </div>\
+               <div class="form-group">\
+                   <label for="fileProductPicture">Profile Picture</label>\
+                   <input type="file" class="form-control" name="fileProductPicture">\
+               </div>\
+               <div class="form-group" style="text-align: center">\
+                   <button class="btn btn-primary btnPages" type="button" data-page="saveProduct">Save product</button>\
+               </div>\
+           </form>\
+       </div>\
+       </div>';
+       callback(sDivAddProduct);
+    }
+
+    function saveProduct(callback){
+        var jAjaxData = {
+            "method" : "POST",
+            "url" : "api/product/create-product.php",
+            "form" : "frmAddProduct"
+
+        }
+        doAjax(jAjaxData, function(product){
+            var jProduct = JSON.parse(product);
+            var sId = jProduct.id;
+            getProductPage(sId, function (data) {
+                callback(data);
+            })
         });
     }
 
@@ -293,7 +344,7 @@ else
 
     function generateProductDiv(product) {
         return '<div class="card">\
-                  <img width="250px" height="250px" src="'+product.picture+'">\
+                  <img width="250px" height="250px" src="Pictures/'+product.picture+'">\
                   <div id="productInfoDiv">\
                     <div><span>Name: </span><span>'+product.productName+'</span></div>\
                     <div><span>Price: </span><span>'+product.productPrice+'</span></div>\
@@ -313,7 +364,7 @@ else
                 '<div class="container">\
                     <div class="row">\
                         <div class="col-md-5">\
-                           <img width="100%" src="'+jProduct.picture+'"/>\
+                           <img width="100%" src="Pictures/'+jProduct.picture+'"/>\
                         </div>\
                         <div class="col-md-6">\
                           <div class="row">\
@@ -381,7 +432,7 @@ else
                 '<div class="container">\
                     <div class="row">\
                         <div class="col-md-5">\
-                           <img width="100%" src="'+jUser.picture+'"/>\
+                           <img width="100%" src="Pictures/'+jUser.picture+'"/>\
                         </div>\
                         <div class="col-md-6">\
                           <div class="row">\
