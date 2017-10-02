@@ -3,7 +3,7 @@
 $sajProducts = file_get_contents('../../JSON/products.txt');
 $ajProducts = json_decode($sajProducts);
 
-$sProductId = $_POST['txtProductId'];
+$sProductId = $_POST['id'];
 $sProductName = $_POST['txtProductName'];
 $sProductPrice = $_POST['txtProductPrice'];
 $sProductQuantity = $_POST['txtProductQuantity'];
@@ -20,7 +20,5 @@ for($i = 0; $i < count($ajProducts); $i++) {
 }
 $sajProducts = json_encode($ajProducts);
 file_put_contents('../../JSON/products.txt', $sajProducts);
-
-
 
 ?>

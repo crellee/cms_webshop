@@ -64,7 +64,9 @@ else
             </ul>
         </div>
     </nav>
-<div id="child"></div>
+<div id="parentDiv">
+
+</div>
 
 <script>
 
@@ -78,18 +80,27 @@ else
         if(e.target.classList.contains("btnPages")) {
             var spText = e.target.getAttribute("data-page");
             window[spText](function(data){
-                child.innerHTML = data;
+                parentDiv.innerHTML = data;
             });
         }
         if(e.target.classList.contains("btnCrudPages")) {
             var spText = e.target.getAttribute("data-page");
             var sId = e.target.parentNode.getAttribute("data-id");
             window[spText](sId, function(data){
-                child.innerHTML = data;
+                parentDiv.innerHTML = data;
             });
         }
+        if(e.target.classList.contains("btnEdit")){
+            var spText = e.target.getAttribute("data-method");
+            var editableInfo = document.querySelectorAll(".editable-info");
+            window[spText](e.target, editableInfo);
+        }
+        if(e.target.classList.contains("btnUpdate")){
+            var spText = e.target.getAttribute("data-method");
+            var editTextFields = document.querySelectorAll(".edit-textfield");
+            window[spText](e.target, editTextFields);
+        }
     });
-
 
 
     function getPageLogout(callback) {
@@ -156,12 +167,12 @@ else
     }
     
     function getPageProducts(callback) {
-        var productsBody = "<div class='album text-muted'>\
-                    <div class='container'>\
+        var productsBody =
+                    "<div class='container'>\
                         <div class='row' id='productsContent'>\
                         </div>\
-                    </div>\
-                 </div>";
+                    </div>";
+
         callback(productsBody)
         getProductElements(function (products) {
             productsContent.innerHTML = products;
@@ -207,7 +218,7 @@ else
                         <div class="col-md-6">\
                           <div class="row">\
                             <div class="col-md-12">\
-                                <h3 id="product-editable-info" style="border-bottom: 1px solid #f2f2f2">'+jProduct.productName+'</h3>\
+                                <h3 class="editable-info" id="txtProductName" style="border-bottom: 1px solid #f2f2f2">'+jProduct.productName+'</h3>\
                             </div>\
                           </div>\
                           <div class="row">\
@@ -215,7 +226,7 @@ else
                                 <p>Price:</p>\
                             </div>\
                             <div class="col-md-6">\
-                                <p id="product-editable-info">'+jProduct.productPrice+'</p>\
+                                <p class="editable-info" id="txtProductPrice">'+jProduct.productPrice+'</p>\
                             </div>\
                           </div>\
                           <div class="row">\
@@ -223,7 +234,7 @@ else
                                 <p>Available:</p>\
                             </div>\
                             <div class="col-md-6">\
-                                <p >'+jProduct.quantity+'</p>\
+                                <p class="editable-info" id="txtProductQuantity">'+jProduct.quantity+'</p>\
                             </div>\
                           </div>\
                           <div class="row product-options">\
@@ -232,7 +243,7 @@ else
                                          <button class="col-md-6 btn btn-success">Add to basket</button>\
                                     </div>\
                                     <div class="row" style="margin-top: 10px">\
-                                        <button class="col-md-3 btn btn-secondary">Edit</button>\
+                                        <button class="col-md-3 btn btn-secondary btnEdit" id="edit-product" data-id="'+jProduct.id+'" data-method="changeToEditMode">Edit</button>\
                                         <button class="col-md-3 btn btn-danger">Delete</button>\
                                     </div>\
                                </div>\
@@ -242,6 +253,48 @@ else
                 </div>';
             callback(productDiv)
         });
+    }
+
+    function changeToEditMode(btn, editableInfo) {
+        for(var i = 0; i < editableInfo.length; i++) {
+            var editableElement = editableInfo[i];
+            var editableElementValue = editableElement.innerHTML;
+            var editableElementParent = editableElement.parentNode;
+            var editableElementId = editableElement.getAttribute('id');
+            var inputField = '<input type="text" id="'+editableElementId+'" class="edit-textfield" value="'+editableElementValue+'">';
+            editableElement.remove();
+            editableElementParent.innerHTML = inputField;
+        }
+        var dataId = btn.getAttribute('data-id');
+        var btnId = btn.getAttribute('id');
+        var updateBtn = '<button type="button" id="'+btnId+'" class="btn btn-sm btn-primary btnUpdate" data-id="'+dataId+'" data-method="updateObject">Save changes</button>';
+        var editButtonParentNode = btn.parentNode;
+        btn.remove();
+        editButtonParentNode.insertAdjacentHTML("afterbegin", updateBtn);
+    }
+
+    function updateObject(btn, editTextFields) {
+        var formData = new FormData();
+        var btnDataId = btn.getAttribute('data-id');
+        var btnId = btn.getAttribute('id');
+        var objectToUpdate = btnId.split('-')[1];
+        for(var i = 0; i < editTextFields.length; i++) {
+            var currentField = editTextFields[i];
+            var key = currentField.getAttribute('id');
+            var value = currentField.value;
+            formData.append(key, value);
+        }
+
+        formData.append('id', btnDataId);
+
+        var jAjaxData = {
+            "method" : "POST",
+            "url" : "api/" + objectToUpdate + "/" + btnId  + ".php",
+            "formData" : formData
+        }
+        doAjax(jAjaxData, function (data) {
+            console.log('FROM SERVER', data);
+        })
     }
 
     function getPageOne(callback) {
