@@ -300,11 +300,40 @@ else
                     <div><span>Quantity: </span><span>'+product.quantity+'</span></div>\
                   </div>\
                   <div id="productOptions" data-id="'+product.id+'">\
-                    <button class="btnCrudPages">Add to basket</button>\
+                    <button class="btnCrudPages" data-page="buyProduct">Add to basket</button>\
                     <button class="btnCrudPages" data-page="getProductPage">Show more</button>\
                   </div>\
                 </div>';
     }
+
+    function buyProduct(sId, callback) {
+        console.log(sId);
+        //[{"id":"59cf83eb0c645","productName":"new ashss22","productPrice":"101\u20ac","quantity":"73","picture":"Pictures\/nikeshoe.jpg"}]
+
+        var formData = new FormData();
+        formData.append('txtProductId', sId);
+        var jAjaxData = {
+            "method" : "POST",
+            "url" : "api/product/update-quantity.php",
+            "formData" : formData
+        }
+        doAjax(jAjaxData, function(data){
+            console.log("HER");
+            if(data) {
+                var jBoughtItem = JSON.parse(data);
+                console.log(jBoughtItem.picture);
+                console.log(jBoughtItem.productName);
+                notifycation(jBoughtItem.picture, "You have bought: "+jBoughtItem.productName, "Congratulations");
+                getPageProducts(function(sDiv){
+                    callback(sDiv);
+                });
+            }
+            else {
+                notifycation('','Product is not avaible','ERROR');
+            }
+        });
+    }
+
 
     function getProductPage(sId, callback) {
         doAjax({"method":"GET","url":"api/product/get-product.php/?id=" + sId}, function (product) {
@@ -574,6 +603,27 @@ else
             marker.setPosition(jMarkerPos);
         });
         callback();
+    }
+
+
+    function displayNotification(sUrl, sItemId){
+        var notification = new Notification("Item bought",{
+            icon: sUrl,
+            body : 'You have bought the item: ' + sItemId,
+            tag : "preset"
+        });
+    }
+
+    function notifycation(sUrl, sItemId, sTitle) {
+        if (Notification.permission !== "granted") {
+            Notification.requestPermission();
+        }
+        else {
+            var notification = new Notification(sTitle, {
+                icon: sUrl,
+                body: sItemId
+            });
+        }
     }
 
 </script>
