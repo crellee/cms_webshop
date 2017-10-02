@@ -4,12 +4,17 @@ $sajProducts = file_get_contents('../../JSON/products.txt');
 $ajProducts = json_decode($sajProducts);
 
 $sProductId = $_POST['txtProductId'];
-$sAmountSold = $_POST['txtAmountSold'];
 
 for($i = 0; $i < count($ajProducts); $i++) {
     if($ajProducts[$i]->id == $sProductId) {
-        $ajProducts[$i]->quantity = $ajProducts[$i]->quantity - $sAmountSold;
-        echo json_encode($ajProducts[$i]);
+        if($ajProducts[$i]->quantity != 0) {
+            $ajProducts[$i]->quantity = $ajProducts[$i]->quantity - 1;
+            echo json_encode($ajProducts[$i]);
+        }
+        else {
+
+        }
+
         break;
     }
 }
