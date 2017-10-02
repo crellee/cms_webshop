@@ -112,19 +112,43 @@ else
     }
 
     function getPageLogin(callback) {
-        var sLoginDiv = '<div>\
+        var sLoginDivx = '<div>\
                   <div id="userInputDiv">\
                     <form id="frmLogin"> \
                         <input class="form-control" type="text" name="txtUserEmail" placeholder="User Name">\
                         <input class="form-control" type="text" name="txtUserPassword" placeholder="User Password">\
                         <button class="btn btn-success btnPages" type="button" data-page="doLogin">Login</button>\
                     </form>\
+                    <button class="btn btn-primary btnPages">Sign Up</button>\
                   </div>\
                 </div>';
+        var sLoginDiv =  '<div class="row">\
+            <div class="col-md-6 mx-auto">\
+            <form class="form" id="frmLogin">\
+            <h1>Login</h1>\
+            <div class="form-group">\
+            <label for="txtUserEmail">Email</label>\
+            <input type="text" class="form-control" name="txtUserEmail"  placeholder="Enter email">\
+            </div>\
+            <div class="form-group">\
+            <label for="txtUserPassword">Password</label>\
+            <input type="password" class="form-control" name="txtUserPassword" placeholder="Enter password">\
+            </div>\
+            <div class="form-group" style="text-align: center">\
+            <button class="btn btn-success btnPages" type="button" data-page="doLogin">Login</button>\
+            </div>\
+            </form>\
+            <div style="text-align: center; margin-top: 30px;">\
+            <label for="SignUp">Not a user yet?</label>\
+            <br>\
+            <button class="btn btn-primary btnPages" data-page="getPageSignUp">Sign Up</button>\
+            </div>\
+            </div>\
+            </div>';
         callback(sLoginDiv);
     }
 
-    function doLogin(){
+    function doLogin(callback){
         var jAjaxData = {};
         jAjaxData.method = "POST";
         jAjaxData.url = "api/login/login.php";
@@ -133,9 +157,63 @@ else
             if(user){
                 jMyUser = JSON.parse(user);
                 bIsLoggedIn = true;
+                getPageUsers(function(data){
+                    callback(data);
+                });
             }
         });
     }
+
+    function getPageSignUp(callback){
+        var sSignUpDiv = '<div class="row">\
+        <div class="col-md-6 mx-auto">\
+            <form class="form" id="frmSignUp">\
+                <h1>Create new user</h1>\
+                <div class="form-group">\
+                    <label for="txtUserFirstName">First Name</label>\
+                    <input type="text" class="form-control" name="txtUserFirstName"  placeholder="Enter first name">\
+                </div>\
+                <div class="form-group">\
+                    <label for="txtUserLastName">Last Name</label>\
+                    <input type="text" class="form-control" name="txtUserLastName"  placeholder="Enter last name">\
+                </div>\
+                <div class="form-group">\
+                    <label for="txtUserEmail">Email</label>\
+                    <input type="text" class="form-control" name="txtUserEmail"  placeholder="Enter email">\
+                </div>\
+                <div class="form-group">\
+                    <label for="txtUserPassword">Password</label>\
+                    <input type="password" class="form-control" name="txtUserPassword"  placeholder="Enter password">\
+                </div>\
+                <div class="form-group">\
+                    <label for="fileUserPicture">Profile Picture</label>\
+                    <input type="file" class="form-control" name="fileUserPicture"  placeholder="Enter password">\
+                </div>\
+                <div class="form-group" style="text-align: center">\
+                    <button class="btn btn-primary btnPages" type="button" data-page="doSignUp">Sign Up</button>\
+                </div>\
+            </form>\
+        </div>\
+        </div>';
+        callback(sSignUpDiv);
+    }
+
+    function doSignUp(callback){
+        var jAjaxData = {};
+        jAjaxData.method = "POST";
+        jAjaxData.url = "api/user/create-user.php";
+        jAjaxData.form = "frmSignUp";
+        doAjax(jAjaxData,function(user){
+            if(user){
+                jMyUser = JSON.parse(user);
+                bIsLoggedIn = true;
+                getPageUsers(function(data){
+                    callback(data);
+                });
+            }
+        });
+    }
+
 
     function getPageUsers(callback) {
         doAjax({"method":"GET","url":"api/user/get-users.php?id="+jMyUser.id+""},function(users){
@@ -181,10 +259,10 @@ else
 
     function getProductElements(callback) {
         doAjax({"method":"GET","url":"api/product/get-products.php"}, function (products) {
-            var jProducts = JSON.parse(products);
+            var ajProducts = JSON.parse(products);
             var sProductDivs = "";
-            for(var i = 0; i < jProducts.length; i++) {
-                var jProduct = jProducts[i];
+            for(var i = 0; i < ajProducts.length; i++) {
+                var jProduct = ajProducts[i];
                 sProductDivs += generateProductDiv(jProduct);
             }
             callback(sProductDivs)
@@ -323,7 +401,6 @@ else
             ajax.send(oFrmUser);
         }
         else if(jData.formData) {
-            console.log(jData.formData);
             ajax.send(jData.formData);
         }
         else {
@@ -370,19 +447,13 @@ else
 
     function doSubscribtion(callback){
 
-        var f = document.createElement("form");
-
-        //class="form-control" type="text"
-
-        var i = document.createElement("input"); //input element, text
-        i.setAttribute('name',"txtUserId");
-        i.setAttribute('value',jMyUser.id);
-        i.setAttribute('class',"form-control");
-        i.setAttribute('type',"text");
-        f.appendChild(i);
+        var formData = new FormData(frmSubscribe);
+        formData.append('txtUserId',jMyUser.id);
+        formData.append('txtLatitude', jMarkerPos.lat);
+        formData.append('txtLongtitude', jMarkerPos.lng);
 
 
-        doAjax({"method":"GET","url":"api/subscribe/create-subscribtion.php", "formData":f},function(data){
+        doAjax({"method":"POST","url":"api/subscribe/create-subscribtion.php", "formData":formData},function(data){
             console.log(data);
         });
     }
@@ -394,7 +465,7 @@ else
 
         var uluru = {lat: currentLat, lng: currentLng};
         var map = new google.maps.Map(document.getElementById('map'), {
-            zoom: 15,
+            zoom: 12,
             center: uluru
         });
         mainMap = map;
