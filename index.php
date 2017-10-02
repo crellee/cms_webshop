@@ -343,7 +343,7 @@ else
                                          <button class="col-md-6 btn btn-success">Add to basket</button>\
                                     </div>\
                                     <div class="row" style="margin-top: 10px">\
-                                        <button class="col-md-3 btn btn-secondary btnEdit" id="edit-product" data-id="'+jProduct.id+'" data-method="changeToEditMode">Edit</button>\
+                                        <button class="col-md-3 btn btn-secondary btnEdit" data-api="edit-product" data-id="'+jProduct.id+'" data-method="changeToEditMode">Edit</button>\
                                         <button class="col-md-3 btn btn-danger btnDelete" data-api="delete-product" data-method="deleteObject" data-id="'+jProduct.id+'">Delete</button>\
                                     </div>\
                                </div>\
@@ -357,18 +357,20 @@ else
 
     function deleteObject(sId, sApi, callback){
         var sApiDirectory = sApi.split('-')[1];
-        console.log(sApi);
-        console.log(sApiDirectory);
+        var sObjectUpper = sApiDirectory.charAt(0).toUpperCase() + sApiDirectory.slice(1);
+        var sFunctionToCall = "getPage" + sObjectUpper + "s";
+        var url = "api/"+sApiDirectory+"/"+sApi+".php/?id="+sId;
 
-        jAjaxData = {
+        var jAjaxData = {
             "method" : "GET",
-            "url" : "api/"+sApiDirectory+"/"+sApi+".php/?id="+sId
+            "url" : url
         }
         doAjax(jAjaxData,function(){
-                getPageProducts(function(data){
+                window[sFunctionToCall](function(data){
                     callback(data);
                 });
             });
+
 
     }
 
@@ -406,8 +408,8 @@ else
                           <div class="row product-options">\
                                <div class="col-md-12">\
                                     <div class="row" style="margin-top: 10px">\
-                                        <button class="col-md-3 btn btn-secondary btnEdit" id="edit-user" data-id="'+jUser.id+'" data-method="changeToEditMode">Edit</button>\
-                                        <button class="col-md-3 btn btn-danger">Delete</button>\
+                                        <button class="col-md-3 btn btn-secondary btnEdit" data-api="edit-user" data-id="'+jUser.id+'" data-method="changeToEditMode">Edit</button>\
+                                        <button class="col-md-3 btn btn-danger btnDelete" data-api="delete-user" data-method="deleteObject" data-id="'+jUser.id+'">Delete</button>\
                                     </div>\
                                </div>\
                           </div>\
@@ -429,8 +431,8 @@ else
             editableElementParent.innerHTML = inputField;
         }
         var dataId = btn.getAttribute('data-id');
-        var btnId = btn.getAttribute('id');
-        var updateBtn = '<button type="button" id="'+btnId+'" class="btn btn-sm btn-primary btnUpdate" data-id="'+dataId+'" data-method="updateObject">Save changes</button>';
+        var sApi = btn.getAttribute('data-api');
+        var updateBtn = '<button type="button" class="btn btn-sm btn-primary btnUpdate" data-api="'+sApi+'" data-id="'+dataId+'" data-method="updateObject">Save changes</button>';
         var editButtonParentNode = btn.parentNode;
         btn.remove();
         editButtonParentNode.insertAdjacentHTML("afterbegin", updateBtn);
@@ -439,9 +441,12 @@ else
     function updateObject(btn, editTextFields, callback) {
         var formData = new FormData();
         var btnDataId = btn.getAttribute('data-id');
-        var btnId = btn.getAttribute('id');
-        var objectToUpdate = btnId.split('-')[1];
-        var sObjectUpper = objectToUpdate.charAt(0).toUpperCase() + objectToUpdate.slice(1);
+        var sApi = btn.getAttribute('data-api');
+        var sApiDirectory = sApi.split('-')[1];
+        var sObjectUpper = sApiDirectory.charAt(0).toUpperCase() + sApiDirectory.slice(1);
+        var sFunctionToCall = "get"+sObjectUpper+"Page";
+        var url = "api/" + sApiDirectory + "/" + sApi  + ".php";
+
         for(var i = 0; i < editTextFields.length; i++) {
             var currentField = editTextFields[i];
             var key = currentField.getAttribute('id');
@@ -452,13 +457,13 @@ else
 
         var jAjaxData = {
             "method" : "POST",
-            "url" : "api/" + objectToUpdate + "/" + btnId  + ".php",
+            "url" : url,
             "formData" : formData
         }
 
         doAjax(jAjaxData, function (data) {
             console.log(data);
-            window["get"+sObjectUpper+"Page"](btnDataId, function(data){
+            window[sFunctionToCall](btnDataId, function(data){
                 callback(data);
             });
         });
