@@ -197,7 +197,7 @@ else
             if(user){
                 jMyUser = JSON.parse(user);
                 bIsLoggedIn = true;
-                getPageUsers(function(data){
+                getPageMyUser(function(data){
                     getLoggedInNavbar();
                     callback(data);
                 });
@@ -651,6 +651,12 @@ else
 
     function getGoogleMaps(callback){
         doAjax({"method":"GET","url":"api/subscribe/get-subscribers.php"},function(subscribers){
+            var jAjaxData = {
+                "method":"GET",
+                "url":"api/user/get-users.php?id="+jMyUser.id
+            };
+            doAjax(jAjaxData, function(sajUsers){
+            var ajUsers = JSON.parse(sajUsers);
             navigator.geolocation.getCurrentPosition(function(position){
                 initMap(position, function(){
                     //Her når vi til når geolocation og kortet er loadet.
@@ -662,15 +668,20 @@ else
                                 lat: Number(ajSubscribers[i].latitude),
                                 lng: Number(ajSubscribers[i].longtitude)
                             };
-                        var subscriberMarker = new google.maps.Marker({
-                            map: mainMap,
-                            position: jSubscriberPosition
-                        });
-                        markers.push(subscriberMarker);
+                        var sSubscriberId = ajSubscribers[i].userId;
+                        for(var j = 0; j < ajUsers.length; j++) {
+                            if(sSubscriberId == ajUsers[j].id) {
+                                createNewMarker(jSubscriberPosition, ajUsers[j]);
+                                break;
+                            }
+                        }
+
+
                     }
                 });
             });
 
+        });
         });
 
         var sSubscribtionDiv = '<form id="frmSubscribe">\
@@ -678,6 +689,28 @@ else
                     </form>';
 
         callback("<h1>Choose your location on the map and click subscribe!</h1><div id='map'></div>" + sSubscribtionDiv);
+    }
+
+    function createNewMarker(position, jUser) {
+
+        var sInfoWindowContent = '<div><div>First Name: '+jUser.firstName+'</div>\
+            <div>Last Name: '+jUser.lastName+' </div>\
+            <div>E-mail: '+jUser.email+' </div>\
+            <img width="70px" height="70px" src="'+jUser.picture+'">\
+            </div>';
+
+        var subscriberMarker = new google.maps.Marker({
+            map: mainMap,
+            position: position
+        });
+        subscriberMarker['infowindow'] = new google.maps.InfoWindow({
+            content : sInfoWindowContent
+        });
+
+        google.maps.event.addListener(subscriberMarker, 'click', function(){
+            this['infowindow'].open(mainMap, this);
+        });
+        markers.push(subscriberMarker);
     }
 
     function doSubscribtion(callback){

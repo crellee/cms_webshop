@@ -1,1 +1,1 @@
-[{"id":"59cf915ce474c","userId":"59bd13f22fac6","latitude":"55.69405660677353","longtitude":"12.551321983337402"},{"id":"59cfad44433a8","userId":"59ca09559758b","latitude":"55.700417425860586","longtitude":"12.547245025634766"},{"id":"59d1ec9a75a4c","userId":"59cf7b3a2ae62","latitude":"55.70407201001124","longtitude":"12.537932395935059"}]
+[{"id":"59d35c950d16b","userId":"59d34b3f0f059","latitude":"55.69751830256933","longtitude":"12.553939819335938"},{"id":"59d35cb04362a","userId":"59d2521ac06fa","latitude":"55.68029446883403","longtitude":"12.522010803222656"}]
