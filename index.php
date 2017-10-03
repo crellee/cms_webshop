@@ -1,5 +1,13 @@
 <?php
 session_start();
+$bLoggedIn = false;
+$jMyUser = null;
+if( isset($_SESSION['jMyUser']) )
+{
+    $bLoggedIn = true;
+    $jMyUser = $_SESSION['jMyUser'];
+}
+/*
 if( isset($_SESSION['bLoggedIn']) && isset($_SESSION['jMyUser'])  )
 {
     $bLoggedIn  = "true";
@@ -10,6 +18,7 @@ else
     $bLoggedIn = "false";
     $jMyUser = json_encode(new stdClass());
 }
+*/
 ?>
 
 <!DOCTYPE html>
@@ -34,7 +43,7 @@ else
         <button class="navbar-toggler navbar-toggler-right hidden-lg-up" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <a class="navbar-brand" href="#">Webshop</a>
+        <a class="navbar-brand btnPages" href="" data-page="getHomePage">Webshop</a>
 
         <div class="collapse navbar-collapse" id="navbarsExampleDefault">
             <ul class="navbar-nav mr-auto" id="navMain">
@@ -71,13 +80,16 @@ else
 
 <script>
 
-    var jMyUser = <?php echo $jMyUser ?>;
-    var bIsLoggedIn = <?php echo $bLoggedIn?>;
+    var jMyUser = <?php echo json_encode($jMyUser) ?>;
+    var bIsLoggedIn = <?php echo json_encode($bLoggedIn)?>;
 
     console.log(jMyUser);
     console.log(bIsLoggedIn);
 
     (function(){
+        getHomePage(function (homePageDiv) {
+            parentDiv.innerHTML = homePageDiv;
+        })
         if(bIsLoggedIn){
             getLoggedInNavbar();
         }
@@ -138,11 +150,24 @@ else
         callback();
     }
 
+    function getHomePage(callback) {
+        var homePageContent = "";
+        jMyUser ? homePageContent =
+                '<div class="jumbotron">\
+                    <h1>Hi '+jMyUser.firstName+'</h3>\
+                </div>'
+                : homePageContent =
+                '<div class="jumbotron">\
+                   <h1>Hi, welcome to this webshop!</h3>\
+                </div>';
+        callback(homePageContent);
+    }
+
     function getPageLogout(callback) {
         doAjax({"method":"GET","url":"api/login/logout.php"},function(){
             getPageLogin(function(sLoginDiv){
                 removeActivePage(function(){
-                    jMyUser ={};
+                    jMyUser = null;
                     bIsLoggedIn = false;
                     getLoggedOutNavbar();
                     callback(sLoginDiv);
@@ -197,9 +222,9 @@ else
             if(user){
                 jMyUser = JSON.parse(user);
                 bIsLoggedIn = true;
-                getPageMyUser(function(data){
+                getHomePage(function(homePageDiv){
                     getLoggedInNavbar();
-                    callback(data);
+                    callback(homePageDiv);
                 });
             }
         });
@@ -650,17 +675,6 @@ else
         });
     }
 
-    function getPageOne(callback) {
-        console.log('hey page one');
-        var sDiv = "This is page one";
-        callback(sDiv);
-
-    }
-    function getPageTwo(callback) {
-        var sDiv = "This is page two";
-        callback(sDiv);
-    }
-
     //Kan måske optimeres lidt..
     function doAjax(jData, callback){
         var ajax = new XMLHttpRequest();
@@ -819,26 +833,22 @@ else
         navMain.innerHTML = "";
         navLogin.innerHTML = "";
 
-        var sNavbarLogout = '<li class="nav-item">\ \
-                   <a class="nav-link btnPages" data-page="getPageMyUser">My User</a>\            \
-                   </li>\
-            <li class="nav-item">\
-            <a class="nav-link btnPages" data-page="getPageLogout">Logout</a>\
+        var sNavbarLogout =
+            '<li class="nav-item">\ \
+                <a class="nav-link btnPages" data-page="getPageMyUser">My User</a>\            \
+             </li>\
+             <li class="nav-item">\
+                <a class="nav-link btnPages" data-page="getPageLogout">Logout</a>\
             </li>';
-        var sNavbarMain = '<li class="nav-item">\
-            <a class="nav-link btnPages" data-page=\'getPageOne\'>Page one</a>\
-            </li>\
-            <li class="nav-item">\
-            <a class="nav-link btnPages" data-page=\'getPageTwo\'>Page Two</a>\
-            </li>\
-            <li class="nav-item">\
-            <a class="nav-link btnPages" data-page=\'getGoogleMaps\'>Maps</a>\
-            </li>\
-            <li class="nav-item">\
-            <a class="nav-link btnPages" data-page=\'getPageProducts\'>Products</a>\
-            </li>\
-            <li class="nav-item">\
-            <a class="nav-link btnPages" data-page=\'getPageUsers\'>Users</a>\
+        var sNavbarMain =
+            '<li class="nav-item">\
+                <a class="nav-link btnPages" data-page="getGoogleMaps">Maps</a>\
+                </li>\
+                <li class="nav-item">\
+                <a class="nav-link btnPages" data-page="getPageProducts">Products</a>\
+                </li>\
+                <li class="nav-item">\
+                <a class="nav-link btnPages" data-page="getPageUsers">Users</a>\
             </li>';
 
         navLogin.insertAdjacentHTML('beforeend',sNavbarLogout);
