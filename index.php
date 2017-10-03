@@ -91,6 +91,7 @@ else
         if(e.target.classList.contains("btnCrudPages")) {
             var spText = e.target.getAttribute("data-page");
             var sId = e.target.parentNode.getAttribute("data-id");
+            var currentLocation = e.target.getAttribute("data-location");
             window[spText](sId, function(data){
                 parentDiv.innerHTML = data;
             });
@@ -358,23 +359,24 @@ else
         });
     }
 
-    function generateProductDiv(product) {
+    function generateProductDiv(jProduct) {
         return '<div class="card">\
-                  <img width="250px" height="250px" src="'+product.picture+'">\
+                  <img width="250px" height="250px" src="'+jProduct.picture+'">\
                   <div id="productInfoDiv">\
-                    <div><span>Name: </span><span>'+product.productName+'</span></div>\
-                    <div><span>Price: </span><span>'+product.productPrice+'</span></div>\
-                    <div><span>Quantity: </span><span>'+product.quantity+'</span></div>\
+                    <div><span>Name: </span><span>'+jProduct.productName+'</span></div>\
+                    <div><span>Price: </span><span>'+jProduct.productPrice+'</span></div>\
+                    <div><span>Quantity: </span><span class="productQuantity" data-id="'+jProduct.id+'">'+jProduct.quantity+'</span></div>\
                   </div>\
-                  <div id="productOptions" data-id="'+product.id+'">\
-                    <button class="btnCrudPages" data-page="buyProduct">Add to basket</button>\
-                    <button class="btnCrudPages" data-page="getProductPage">Show more</button>\
+                  <div id="productOptions" data-id="'+jProduct.id+'">\
+                    <button class="btn btn-sm btn-success btnCrudPages" data-location="productsPage" data-page="buyProduct">Add to basket</button>\
+                    <button class="btn btn-sm btn-primary btnCrudPages" data-page="getProductPage">Show more</button>\
                   </div>\
                 </div>';
     }
 
-    function buyProduct(sId, callback) {
+    function buyProduct(sId, callback ) {
         console.log(sId);
+        var sQuantityElements = document.querySelectorAll(".productQuantity");
         //[{"id":"59cf83eb0c645","productName":"new ashss22","productPrice":"101\u20ac","quantity":"73","picture":"Pictures\/nikeshoe.jpg"}]
 
         var formData = new FormData();
@@ -389,15 +391,28 @@ else
                 var jBoughtItem = JSON.parse(data);
                 displayNotification(jBoughtItem.picture, "You have bought: "+jBoughtItem.productName, "Congratulations");
                 playSound('Sounds/purchase_success.mp3');
-                getPageProducts(function(sDiv){
-                    callback(sDiv);
-                });
+                decrementQuantityinHTML(jBoughtItem.id, sQuantityElements)
             }
             else {
                 playSound('Sounds/purchase_error.mp3');
                 displayNotification('','Product is not avaible','ERROR');
             }
         });
+    }
+
+    function decrementQuantityinHTML(productId, sQuantityElements) {
+        for(var i = 0; i < sQuantityElements.length; i++) {
+            var sCurrentQuantityElement = sQuantityElements[i];
+            var sCurrentQuantityElementDataId = sCurrentQuantityElement.getAttribute('data-id');
+
+            if (productId === sCurrentQuantityElementDataId) {
+                var iQuantityValue = parseInt(sCurrentQuantityElement.innerHTML);
+                if (iQuantityValue > 0) {
+                    iQuantityValue = --iQuantityValue;
+                    sCurrentQuantityElement.innerHTML = iQuantityValue;
+                }
+            }
+        }
     }
 
     function getProductPage(sId, callback) {
@@ -428,13 +443,13 @@ else
                                 <p>Available:</p>\
                             </div>\
                             <div class="col-md-6">\
-                                <p class="editable-info" id="txtProductQuantity">'+jProduct.quantity+'</p>\
+                                <p class="editable-info productQuantity" data-id="'+jProduct.id+'"  id="txtProductQuantity">'+jProduct.quantity+'</p>\
                             </div>\
                           </div>\
                           <div class="row product-options">\
                                <div class="col-md-12">\
                                     <div class="row" style="margin-top: 10px" data-id="'+jProduct.id+'">\
-                                            <button class="col-md-6 btn btn-success btnCrudPages" data-page="buyProduct">Add to basket</button>\
+                                            <button class="col-md-6 btn btn-success btnCrudPages" data-location="productPage" data-page="buyProduct">Add to basket</button>\
                                     </div>\
                                     <div class="row" style="margin-top: 10px">\
                                         <button class="col-md-3 btn btn-secondary btnEdit" data-api="edit-product" data-id="'+jProduct.id+'" data-method="changeToEditMode">Edit</button>\
