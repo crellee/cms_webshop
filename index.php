@@ -37,8 +37,8 @@ else
         <a class="navbar-brand" href="#">Webshop</a>
 
         <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item">
+            <ul class="navbar-nav mr-auto" id="navMain">
+<!--                <li class="nav-item">
                     <a class="nav-link btnPages" data-page='getPageOne'>Page one</a>
                 </li>
                 <li class="nav-item">
@@ -53,14 +53,15 @@ else
                 <li class="nav-item">
                     <a class="nav-link btnPages" data-page='getPageUsers'>Users</a>
                 </li>
+                -->
             </ul>
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item">
-                    <a class="nav-link btnPages" data-page='getPageLogin'>Login</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link btnPages" data-page='getPageLogout'>Logout</a>
-                </li>
+            <ul class="navbar-nav ml-auto" id="navLogin">
+                <!--           <li class="nav-item">
+                              <a class="nav-link btnPages" data-page='getPageLogin'>Login</a>
+                          </li>
+                         <li class="nav-item">
+                              <a class="nav-link btnPages" data-page='getPageLogout'>Logout</a>
+                          </li> -->
             </ul>
         </div>
     </nav>
@@ -75,6 +76,15 @@ else
 
     console.log(jMyUser);
     console.log(bIsLoggedIn);
+
+    (function(){
+        if(bIsLoggedIn){
+            getLoggedInNavbar();
+        }
+        else {
+            getLoggedOutNavbar();
+        }
+    })();
 
     document.addEventListener("click",function(e){
         if(e.target.classList.contains("btnPages")) {
@@ -131,8 +141,9 @@ else
         doAjax({"method":"GET","url":"api/login/logout.php"},function(){
             getPageLogin(function(sLoginDiv){
                 removeActivePage(function(){
-                    var elements = document.querySelectorAll('[data-page="getPageLogin"]');
-                    elements[0].className += ' active';
+                    jMyUser ={};
+                    bIsLoggedIn = false;
+                    getLoggedOutNavbar();
                     callback(sLoginDiv);
                 });
             });
@@ -186,6 +197,7 @@ else
                 jMyUser = JSON.parse(user);
                 bIsLoggedIn = true;
                 getPageUsers(function(data){
+                    getLoggedInNavbar();
                     callback(data);
                 });
             }
@@ -468,14 +480,28 @@ else
 
     }
 
+    function getPageMyUser(callback){
+        console.log("hertil");
+    }
+
     function getUserPage(sId, callback) {
+
+        if(jMyUser.id == sId) {
+            callback(generateUserProfileContent(jMyUser));
+        }
+        else {
         doAjax({"method":"GET","url":"api/user/get-user.php/?id=" + sId}, function (user) {
             var jUser = JSON.parse(user);
-            var sUserDiv =
-                '<div class="container">\
-                    <div class="row">\
-                        <div class="col-md-5">\
-                           <img width="100%" src="'+jUser.picture+'"/>\
+            callback(generateUserProfileContent(jUser))
+        });
+        }
+    }
+    function generateUserProfileContent(jUser) {
+        var sUserDiv =
+            '<div class="container">\
+                <div class="row">\
+                    <div class="col-md-5">\
+                       <img width="100%" src="'+jUser.picture+'"/>\
                         </div>\
                         <div class="col-md-6">\
                           <div class="row">\
@@ -510,9 +536,10 @@ else
                         </div>\
                     </div>\
                 </div>';
-            callback(sUserDiv)
-        });
+        return sUserDiv;
+
     }
+
 
     function changeToEditMode(btn, editableInfo) {
         for(var i = 0; i < editableInfo.length; i++) {
@@ -685,6 +712,45 @@ else
     function playSound(soundPath) {
         var oSound = new Audio(soundPath);
         oSound.play();
+    }
+
+    function getLoggedInNavbar(){
+        navMain.innerHTML = "";
+        navLogin.innerHTML = "";
+
+        var sNavbarLogout = '<li class="nav-item">\ \
+                   <a class="nav-link btnPages" data-page="getPageMyUser">My User</a>\            \
+                   </li>\
+            <li class="nav-item">\
+            <a class="nav-link btnPages" data-page="getPageLogout">Logout</a>\
+            </li>';
+        var sNavbarMain = '<li class="nav-item">\
+            <a class="nav-link btnPages" data-page=\'getPageOne\'>Page one</a>\
+            </li>\
+            <li class="nav-item">\
+            <a class="nav-link btnPages" data-page=\'getPageTwo\'>Page Two</a>\
+            </li>\
+            <li class="nav-item">\
+            <a class="nav-link btnPages" data-page=\'getGoogleMaps\'>Maps</a>\
+            </li>\
+            <li class="nav-item">\
+            <a class="nav-link btnPages" data-page=\'getPageProducts\'>Products</a>\
+            </li>\
+            <li class="nav-item">\
+            <a class="nav-link btnPages" data-page=\'getPageUsers\'>Users</a>\
+            </li>';
+
+        navLogin.insertAdjacentHTML('beforeend',sNavbarLogout);
+        navMain.insertAdjacentHTML('afterbegin', sNavbarMain);
+    }
+    function getLoggedOutNavbar(){
+        navMain.innerHTML = "";
+        navLogin.innerHTML = "";
+
+        sNavbar = '<li class="nav-item">\
+            <a class="nav-link btnPages" data-page="getPageLogin">Login</a>\
+            </li>';
+        navLogin.insertAdjacentHTML("beforeend",sNavbar);
     }
 
 </script>
