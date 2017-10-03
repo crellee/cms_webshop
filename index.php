@@ -298,19 +298,28 @@ else
     function getPageProducts(callback) {
         var productsBody =
                     "<div class='container'>\
-                        <div class='row' style='margin-bottom: 10px; margin-top: 10px'>\
-                            <div class='col-md-12'>\
-                                <button class='btn btn-success btnPages' data-page='getPageAddProduct'>Add product</button>\
-                            </div>\
+                        <div class='row' id='adminOptions' style='margin-bottom: 10px; margin-top: 10px'>\
                         </div>\
                         <div class='row' id='productsContent'>\
                         </div>\
                     </div>";
 
         callback(productsBody);
+        if(jMyUser.admin) {
+            getAddProductsButton(function (btnAddProductsDiv) {
+                adminOptions.innerHTML = btnAddProductsDiv;
+            });
+        }
         getProductElements(function (products) {
             productsContent.innerHTML = products;
         });
+    }
+
+    function getAddProductsButton(callback) {
+        var addProductsButtonDiv = "<div class='col-md-12'>\
+                <button class='btn btn-success btnPages' data-page='getPageAddProduct'>Add product</button>\
+               </div>";
+        callback(addProductsButtonDiv)
     }
 
     function getPageAddProduct(callback) {
@@ -430,8 +439,16 @@ else
     function getProductPage(sId, callback) {
         doAjax({"method":"GET","url":"api/product/get-product.php/?id=" + sId}, function (product) {
             var jProduct = JSON.parse(product);
-            var productDiv =
-                '<div class="container">\
+            var productPageMainInfo = getProductPageMainInfo(jProduct);
+            callback(productPageMainInfo);
+            getProductPageOptions(jProduct, jMyUser, function (productOptionsDiv) {
+                productOptions.innerHTML = productOptionsDiv;
+            });
+        });
+    }
+
+    function getProductPageMainInfo(jProduct) {
+        return '<div class="container">\
                     <div class="row">\
                         <div class="col-md-5">\
                            <img width="100%" src="'+jProduct.picture+'"/>\
@@ -458,22 +475,30 @@ else
                                 <p class="editable-info productQuantity" data-id="'+jProduct.id+'"  id="txtProductQuantity">'+jProduct.quantity+'</p>\
                             </div>\
                           </div>\
-                          <div class="row product-options">\
-                               <div class="col-md-12">\
-                                    <div class="row" style="margin-top: 10px" data-id="'+jProduct.id+'">\
-                                            <button class="col-md-6 btn btn-success btnCrudPages" data-location="productPage" data-page="buyProduct">Add to basket</button>\
-                                    </div>\
-                                    <div class="row" style="margin-top: 10px">\
-                                        <button class="col-md-3 btn btn-secondary btnEdit" data-api="edit-product" data-id="'+jProduct.id+'" data-method="changeToEditMode">Edit</button>\
-                                        <button class="col-md-3 btn btn-danger btnDelete" data-api="delete-product" data-method="deleteObject" data-id="'+jProduct.id+'">Delete</button>\
-                                    </div>\
-                               </div>\
+                          <div class="row product-options" id="productOptions">\
                           </div>\
                         </div>\
                     </div>\
                 </div>';
-            callback(productDiv)
-        });
+    }
+
+    function getProductPageOptions(jProduct, jUser, callback) {
+        var productOptions = "";
+        jUser.admin ?
+            productOptions =
+            '<div class="col-md-12">\
+                 <div class="row" style="margin-top: 10px">\
+                  <button class="col-md-3 btn btn-secondary btnEdit" data-api="edit-product" data-id="'+jProduct.id+'" data-method="changeToEditMode">Edit</button>\
+                  <button class="col-md-3 btn btn-danger btnDelete" data-api="delete-product" data-method="deleteObject" data-id="'+jProduct.id+'">Delete</button>\
+                </div>\
+             </div>' :
+            productOptions =
+                '<div class="col-md-12">\
+                      <div class="row" style="margin-top: 10px" data-id="'+jProduct.id+'">\
+                          <button class="col-md-6 btn btn-success btnCrudPages" data-location="productPage" data-page="buyProduct">Add to basket</button>\
+                       </div>\
+                 </div>';
+        callback(productOptions);
     }
 
     function deleteObject(sId, sApi, callback){
@@ -505,10 +530,10 @@ else
             callback(generateUserProfileContent(jMyUser));
         }
         else {
-        doAjax({"method":"GET","url":"api/user/get-user.php/?id=" + sId}, function (user) {
-            var jUser = JSON.parse(user);
-            callback(generateUserProfileContent(jUser))
-        });
+            doAjax({"method":"GET","url":"api/user/get-user.php/?id=" + sId}, function (user) {
+                var jUser = JSON.parse(user);
+                callback(generateUserProfileContent(jUser))
+            });
         }
     }
 
