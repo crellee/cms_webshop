@@ -25,7 +25,7 @@ else
     <style>
         #map {
             height: 400px;
-            width: 400px;
+            width: 800px;
         }
     </style>
 </head>
@@ -397,7 +397,7 @@ else
 
     function buyProduct(sId, callback ) {
         console.log(sId);
-        var sQuantityElements = document.querySelectorAll(".productQuantity");
+        var aQuantityElements = document.querySelectorAll(".productQuantity");
         //[{"id":"59cf83eb0c645","productName":"new ashss22","productPrice":"101\u20ac","quantity":"73","picture":"Pictures\/nikeshoe.jpg"}]
 
         var formData = new FormData();
@@ -412,7 +412,7 @@ else
                 var jBoughtItem = JSON.parse(data);
                 displayNotification(jBoughtItem.picture, "You have bought: "+jBoughtItem.productName, "Congratulations");
                 playSound('Sounds/purchase_success.mp3');
-                decrementQuantityinHTML(jBoughtItem.id, sQuantityElements)
+                decrementQuantityinHTML(jBoughtItem.id, aQuantityElements)
             }
             else {
                 playSound('Sounds/purchase_error.mp3');
@@ -421,15 +421,15 @@ else
         });
     }
 
-    function decrementQuantityinHTML(productId, sQuantityElements) {
-        for(var i = 0; i < sQuantityElements.length; i++) {
-            var sCurrentQuantityElement = sQuantityElements[i];
+    function decrementQuantityinHTML(productId, aQuantityElements) {
+        for(var i = 0; i < aQuantityElements.length; i++) {
+            var sCurrentQuantityElement = aQuantityElements[i];
             var sCurrentQuantityElementDataId = sCurrentQuantityElement.getAttribute('data-id');
 
             if (productId === sCurrentQuantityElementDataId) {
                 var iQuantityValue = parseInt(sCurrentQuantityElement.innerHTML);
                 if (iQuantityValue > 0) {
-                    iQuantityValue = --iQuantityValue;
+                    iQuantityValue--;
                     sCurrentQuantityElement.innerHTML = iQuantityValue;
                 }
             }
