@@ -496,7 +496,7 @@ else
     }
 
     function getPageMyUser(callback){
-        console.log("hertil");
+        callback(generateUserProfileContent(jMyUser));
     }
 
     function getUserPage(sId, callback) {
