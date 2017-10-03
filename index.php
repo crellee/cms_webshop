@@ -249,6 +249,7 @@ else
                 jMyUser = JSON.parse(user);
                 bIsLoggedIn = true;
                 getPageUsers(function(data){
+                    getLoggedInNavbar();
                     callback(data);
                 });
             }
@@ -302,7 +303,8 @@ else
                         </div>\
                         <div class='row' id='productsContent'>\
                         </div>\
-                    </div>";
+                        <div class=row'>\
+                        </div>";
 
         callback(productsBody);
         if(jMyUser.admin) {
@@ -511,9 +513,16 @@ else
             "url" : url
         }
         doAjax(jAjaxData,function(){
+            if(sId == jMyUser.id) {
+                getPageLogout(function(sLogoutdata){
+                    callback(sLogoutdata)
+                });
+            }
+            else {
                 window[sFunctionToCall](function(data){
                     callback(data);
                 });
+            }
             });
 
 
@@ -535,7 +544,7 @@ else
                 var jUser = JSON.parse(user);
                 callback(generateUserProfileContent(jUser));
                 if(jMyUser.admin) {
-                    userOptions.innerHTML = getProfilePageOptions(jMyUser);
+                    userOptions.innerHTML = getProfilePageOptions(jUser);
                 }
             });
         }
@@ -681,6 +690,7 @@ else
     var mainMap;
 
     function getGoogleMaps(callback){
+        if(jMyUser.admin) {
         doAjax({"method":"GET","url":"api/subscribe/get-subscribers.php"},function(subscribers){
             var jAjaxData = {
                 "method":"GET",
@@ -714,7 +724,14 @@ else
 
         });
         });
+        }
+        else {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                initMap(position, function () {
 
+                });
+            });
+        }
         var sSubscribtionDiv = '<form id="frmSubscribe">\
                         <button class="btn btn-success btnPages" type="button" data-page="doSubscribtion">Subscribe!</button>\
                     </form>';
