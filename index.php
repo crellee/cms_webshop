@@ -511,6 +511,7 @@ else
         });
         }
     }
+
     function generateUserProfileContent(jUser) {
         var sUserDiv =
             '<div class="container">\
@@ -598,7 +599,11 @@ else
         }
 
         doAjax(jAjaxData, function (data) {
-            console.log(data);
+            var jData = JSON.parse(data);
+
+            if(jData.updateSession) {
+                jMyUser = jData.jUser;
+            }
             window[sFunctionToCall](btnDataId, function(data){
                 callback(data);
             });
