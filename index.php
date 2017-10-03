@@ -441,9 +441,7 @@ else
             var jProduct = JSON.parse(product);
             var productPageMainInfo = getProductPageMainInfo(jProduct);
             callback(productPageMainInfo);
-            getProductPageOptions(jProduct, jMyUser, function (productOptionsDiv) {
-                productOptions.innerHTML = productOptionsDiv;
-            });
+            productOptions.innerHTML = getProductPageOptions(jProduct, jMyUser);
         });
     }
 
@@ -482,7 +480,7 @@ else
                 </div>';
     }
 
-    function getProductPageOptions(jProduct, jUser, callback) {
+    function getProductPageOptions(jProduct, jUser) {
         var productOptions = "";
         jUser.admin ?
             productOptions =
@@ -498,7 +496,8 @@ else
                           <button class="col-md-6 btn btn-success btnCrudPages" data-location="productPage" data-page="buyProduct">Add to basket</button>\
                        </div>\
                  </div>';
-        callback(productOptions);
+
+        return productOptions;
     }
 
     function deleteObject(sId, sApi, callback){
@@ -522,17 +521,22 @@ else
 
     function getPageMyUser(callback){
         callback(generateUserProfileContent(jMyUser));
+        userOptions.innerHTML = getProfilePageOptions(jMyUser);
     }
 
     function getUserPage(sId, callback) {
 
         if(jMyUser.id == sId) {
             callback(generateUserProfileContent(jMyUser));
+            userOptions.innerHTML = getProfilePageOptions(jMyUser);
         }
         else {
             doAjax({"method":"GET","url":"api/user/get-user.php/?id=" + sId}, function (user) {
                 var jUser = JSON.parse(user);
-                callback(generateUserProfileContent(jUser))
+                callback(generateUserProfileContent(jUser));
+                if(jMyUser.admin) {
+                    userOptions.innerHTML = getProfilePageOptions(jMyUser);
+                }
             });
         }
     }
@@ -566,19 +570,21 @@ else
                                 <p class="editable-info" id="txtUserEmail">'+jUser.email+'</p>\
                             </div>\
                           </div>\
-                          <div class="row product-options">\
-                               <div class="col-md-12">\
-                                    <div class="row" style="margin-top: 10px">\
-                                        <button class="col-md-3 btn btn-secondary btnEdit" data-api="edit-user" data-id="'+jUser.id+'" data-method="changeToEditMode">Edit</button>\
-                                        <button class="col-md-3 btn btn-danger btnDelete" data-api="delete-user" data-method="deleteObject" data-id="'+jUser.id+'">Delete</button>\
-                                    </div>\
-                               </div>\
+                          <div class="row user-options" id="userOptions">\
                           </div>\
                         </div>\
                     </div>\
                 </div>';
         return sUserDiv;
+    }
 
+    function getProfilePageOptions(jUser) {
+        return  '<div class="col-md-12">\
+                    <div class="row" style="margin-top: 10px">\
+                    <button class="col-md-3 btn btn-secondary btnEdit" data-api="edit-user" data-id="'+jUser.id+'" data-method="changeToEditMode">Edit</button>\
+                    <button class="col-md-3 btn btn-danger btnDelete" data-api="delete-user" data-method="deleteObject" data-id="'+jUser.id+'">Delete</button>\
+                    </div>\
+                </div>'
     }
 
 
