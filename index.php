@@ -556,6 +556,7 @@ else
     function getPageMyUser(callback){
         callback(generateUserProfileContent(jMyUser));
         userOptions.innerHTML = getProfilePageOptions(jMyUser);
+
     }
 
     function getUserPage(sId, callback) {
@@ -570,6 +571,7 @@ else
                 callback(generateUserProfileContent(jUser));
                 if(jMyUser.admin) {
                     userOptions.innerHTML = getProfilePageOptions(jUser);
+                    console.log(document.getElementsByName('admin'));
                 }
             });
         }
@@ -615,8 +617,8 @@ else
     function getProfilePageOptions(jUser) {
         return  '<div class="col-md-12">\
                     <div class="row" style="margin-top: 10px">\
-                    <button class="col-md-3 btn btn-secondary btnEdit" data-api="edit-user" data-id="'+jUser.id+'" data-method="changeToEditMode">Edit</button>\
-                    <button class="col-md-3 btn btn-danger btnDelete" data-api="delete-user" data-method="deleteObject" data-id="'+jUser.id+'">Delete</button>\
+                        <button class="col-md-3 btn btn-secondary btnEdit" data-api="edit-user" data-id="'+jUser.id+'" data-method="changeToEditMode">Edit</button>\
+                        <button class="col-md-3 btn btn-danger btnDelete" data-api="delete-user" data-method="deleteObject" data-id="'+jUser.id+'">Delete</button>\
                     </div>\
                 </div>'
     }
