@@ -13,6 +13,7 @@ if( isset($_SESSION['jMyUser']) )
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
@@ -32,7 +33,7 @@ if( isset($_SESSION['jMyUser']) )
         <button class="navbar-toggler navbar-toggler-right hidden-lg-up" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <a class="navbar-brand btnPages" href="" data-function="getHomePage">Webshop</a>
+        <a class="navbar-brand btnPages" style="cursor: pointer; color:white" data-function="getHomePage">Webshop</a>
 
         <div class="collapse navbar-collapse" id="navbarsExampleDefault">
             <ul class="navbar-nav mr-auto" id="navMain">
@@ -732,7 +733,10 @@ if( isset($_SESSION['jMyUser']) )
                         <button class="btn btn-success btnPages" type="button" data-function="doSubscription">Subscribe!</button>\
                     </form>';
 
-        callback("<h1>Choose your location on the map and click subscribe!</h1><div id='map'></div>" + sSubscribtionDiv);
+        var sDivMap = "<h1>Choose your location on the map and click subscribe!</h1><div id='map'>Finding your location...<br>\
+        <i class='fa fa-refresh fa-spin' style='font-size:154px;'></i></div>\
+        ";
+        callback(sDivMap + sSubscribtionDiv);
     }
 
     function createNewMarker(position, jUser) {
