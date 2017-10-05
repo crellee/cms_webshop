@@ -3,3 +3,8 @@ body {
 }
 
 .nav-item { cursor: pointer; cursor: hand; }
+
+#map {
+    height: 400px;
+    width: 800px;
+}

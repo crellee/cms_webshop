@@ -7,18 +7,7 @@ if( isset($_SESSION['jMyUser']) )
     $bLoggedIn = true;
     $jMyUser = $_SESSION['jMyUser'];
 }
-/*
-if( isset($_SESSION['bLoggedIn']) && isset($_SESSION['jMyUser'])  )
-{
-    $bLoggedIn  = "true";
-    $jMyUser = json_encode($_SESSION['jMyUser']);
-}
-else
-{
-    $bLoggedIn = "false";
-    $jMyUser = json_encode(new stdClass());
-}
-*/
+
 ?>
 
 <!DOCTYPE html>
@@ -43,34 +32,12 @@ else
         <button class="navbar-toggler navbar-toggler-right hidden-lg-up" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <a class="navbar-brand btnPages" href="" data-page="getHomePage">Webshop</a>
+        <a class="navbar-brand btnPages" href="" data-function="getHomePage">Webshop</a>
 
         <div class="collapse navbar-collapse" id="navbarsExampleDefault">
             <ul class="navbar-nav mr-auto" id="navMain">
-<!--                <li class="nav-item">
-                    <a class="nav-link btnPages" data-page='getPageOne'>Page one</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link btnPages" data-page='getPageTwo'>Page Two</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link btnPages" data-page='getGoogleMaps'>Maps</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link btnPages" data-page='getPageProducts'>Products</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link btnPages" data-page='getPageUsers'>Users</a>
-                </li>
-                -->
             </ul>
             <ul class="navbar-nav ml-auto" id="navLogin">
-                <!--           <li class="nav-item">
-                              <a class="nav-link btnPages" data-page='getPageLogin'>Login</a>
-                          </li>
-                         <li class="nav-item">
-                              <a class="nav-link btnPages" data-page='getPageLogout'>Logout</a>
-                          </li> -->
             </ul>
         </div>
     </nav>
@@ -85,12 +52,9 @@ else
 
     var ajLocalProducts = null;
 
-    console.log(jMyUser);
-    console.log(bIsLoggedIn);
-
     (function(){
-        getHomePage(function (homePageDiv) {
-            parentDiv.innerHTML = homePageDiv;
+        getHomePage(function (sHomePageDiv) {
+            parentDiv.innerHTML = sHomePageDiv;
         });
         if(bIsLoggedIn){
             getLoggedInNavbar();
@@ -100,44 +64,40 @@ else
         }
     })();
 
-    document.addEventListener("click",function(e){
+    document.addEventListener("click",function(e) {
+        var sFunctionName = e.target.getAttribute("data-function");
+
         if(e.target.classList.contains("btnPages")) {
-            var spText = e.target.getAttribute("data-page");
             if(e.target.classList.contains('nav-link')){
                 removeActivePage(function(){
                     e.target.className += ' active';
                 });
             }
-            window[spText](function(data){
+            window[sFunctionName](function(data){
                 parentDiv.innerHTML = data;
             });
         }
         if(e.target.classList.contains("btnCrudPages")) {
-            var spText = e.target.getAttribute("data-page");
             var sId = e.target.parentNode.getAttribute("data-id");
-            var currentLocation = e.target.getAttribute("data-location");
-            window[spText](sId, function(data){
+            window[sFunctionName](sId, function(data){
                 parentDiv.innerHTML = data;
             });
         }
         if(e.target.classList.contains("btnEdit")){
-            var spText = e.target.getAttribute("data-method");
-            var editableInfo = document.querySelectorAll(".editable-info");
-            window[spText](e.target, editableInfo);
+            var aEditableInfo = document.querySelectorAll(".editable-info");
+            window[sFunctionName](e.target, aEditableInfo);
         }
         if(e.target.classList.contains("btnUpdate")){
-            var spText = e.target.getAttribute("data-method");
-            var editTextFields = document.querySelectorAll(".edit-textfield");
-            window[spText](e.target, editTextFields, function(sDiv){
+            var aEditTextFields = document.querySelectorAll(".edit-textfield");
+            window[sFunctionName](e.target, aEditTextFields, function(sDiv){
                 parentDiv.innerHTML = sDiv;
             });
         }
 
         if(e.target.classList.contains("btnDelete")){
-            var spText = e.target.getAttribute("data-method"); //delete method
-            var sApi = e.target.getAttribute("data-api"); //delete-product
             var sId = e.target.getAttribute('data-id');
-            window[spText](sId, sApi, function(data){
+            var sApi = e.target.getAttribute("data-api"); //delete-product
+            window[sFunctionName](sId, sApi, function(data){
                 parentDiv.innerHTML = data;
             });
         }
@@ -145,24 +105,24 @@ else
     });
 
     function removeActivePage(callback){
-        var navElements = document.getElementsByClassName('nav-link');
-        for(var i = 0; i < navElements.length; i++) {
-            navElements[i].classList.remove('active');
+        var aNavElements = document.getElementsByClassName('nav-link');
+        for(var i = 0; i < aNavElements.length; i++) {
+            aNavElements[i].classList.remove('active');
         }
         callback();
     }
 
     function getHomePage(callback) {
-        var homePageContent = "";
-        jMyUser ? homePageContent =
+        var sHomePageContent = "";
+        jMyUser ? sHomePageContent =
                 '<div class="jumbotron">\
                     <h1>Hi '+jMyUser.firstName+'</h3>\
                 </div>'
-                : homePageContent =
+                : sHomePageContent =
                 '<div class="jumbotron">\
                    <h1>Hi, welcome to this webshop!</h3>\
                 </div>';
-        callback(homePageContent);
+        callback(sHomePageContent);
     }
 
     function getPageLogout(callback) {
@@ -179,38 +139,29 @@ else
     }
 
     function getPageLogin(callback) {
-        var sLoginDivx = '<div>\
-                  <div id="userInputDiv">\
-                    <form id="frmLogin"> \
-                        <input class="form-control" type="text" name="txtUserEmail" placeholder="User Name">\
-                        <input class="form-control" type="text" name="txtUserPassword" placeholder="User Password">\
-                        <button class="btn btn-success btnPages" type="button" data-page="doLogin">Login</button>\
+        var sLoginDiv =
+            '<div class="row">\
+                <div class="col-md-6 mx-auto">\
+                    <form class="form" id="frmLogin">\
+                        <h1>Login</h1>\
+                         <div class="form-group">\
+                            <label for="txtUserEmail">Email</label>\
+                            <input type="text" class="form-control" name="txtUserEmail"  placeholder="Enter email">\
+                        </div>\
+                        <div class="form-group">\
+                            <label for="txtUserPassword">Password</label>\
+                            <input type="password" class="form-control" name="txtUserPassword" placeholder="Enter password">\
+                         </div>\
+                        <div class="form-group" style="text-align: center">\
+                            <button class="btn btn-success btnPages" type="button" data-function="doLogin">Login</button>\
+                         </div>\
                     </form>\
-                    <button class="btn btn-primary btnPages">Sign Up</button>\
-                  </div>\
-                </div>';
-        var sLoginDiv =  '<div class="row">\
-            <div class="col-md-6 mx-auto">\
-            <form class="form" id="frmLogin">\
-            <h1>Login</h1>\
-            <div class="form-group">\
-            <label for="txtUserEmail">Email</label>\
-            <input type="text" class="form-control" name="txtUserEmail"  placeholder="Enter email">\
-            </div>\
-            <div class="form-group">\
-            <label for="txtUserPassword">Password</label>\
-            <input type="password" class="form-control" name="txtUserPassword" placeholder="Enter password">\
-            </div>\
-            <div class="form-group" style="text-align: center">\
-            <button class="btn btn-success btnPages" type="button" data-page="doLogin">Login</button>\
-            </div>\
-            </form>\
-            <div style="text-align: center; margin-top: 30px;">\
-            <label for="SignUp">Not a user yet?</label>\
-            <br>\
-            <button class="btn btn-primary btnPages" data-page="getPageSignUp">Sign Up</button>\
-            </div>\
-            </div>\
+                    <div style="text-align: center; margin-top: 30px;">\
+                        <label for="SignUp">Not a user yet?</label>\
+                        <br>\
+                        <button class="btn btn-primary btnPages" data-function="getPageSignUp">Sign Up</button>\
+                    </div>\
+                </div>\
             </div>';
         callback(sLoginDiv);
     }
@@ -258,7 +209,7 @@ else
                     <input type="file" class="form-control" name="fileUserPicture"  placeholder="Enter password">\
                 </div>\
                 <div class="form-group" style="text-align: center">\
-                    <button class="btn btn-primary btnPages" type="button" data-page="doSignUp">Sign Up</button>\
+                    <button class="btn btn-primary btnPages" type="button" data-function="doSignUp">Sign Up</button>\
                 </div>\
             </form>\
         </div>\
@@ -307,24 +258,24 @@ else
         });
     }
 
-    function generateUserDiv(user) {
+    function generateUserDiv(jUser) {
         return '<div>\
                   <div id="userImageDiv">\
-                    <img width="250px" height="250px" src="'+user.picture+'">\
+                    <img width="250px" height="250px" src="'+jUser.picture+'">\
                   </div>\
                   <div id="userInfoDiv">\
-                    <div><span>First name: </span><span>'+user.firstName+'</span></div>\
-                    <div><span>Last name: </span><span>'+user.lastName+'</span></div>\
-                    <div><span>E-mail: </span><span>'+user.email+'</span></div>\
+                    <div><span>First name: </span><span>'+jUser.firstName+'</span></div>\
+                    <div><span>Last name: </span><span>'+jUser.lastName+'</span></div>\
+                    <div><span>E-mail: </span><span>'+jUser.email+'</span></div>\
                   </div>\
-                  <div id="userOptions" data-id="'+user.id+'">\
-                    <button class="btnCrudPages" data-page="getUserPage">Show more</button>\
+                  <div id="userOptions" data-id="'+jUser.id+'">\
+                    <button class="btnCrudPages" data-function="getUserPage">Show more</button>\
                   </div>\
                 </div>';
     }
     
     function getPageProducts(callback) {
-        var productsBody =
+        var sProductsBody =
                     "<div class='container'>\
                         <div class='row' id='adminOptions' style='margin-bottom: 10px; margin-top: 10px'>\
                         </div>\
@@ -336,20 +287,21 @@ else
                         <div class=row'>\
                         </div>";
 
-        callback(productsBody);
+        callback(sProductsBody);
 
+        //Search funtionality
         txtSearchBar.addEventListener('input',function(){
             var sSearchBarValue = txtSearchBar.value.toLowerCase();
-            var sFitleredProductsDiv = "";
+            var sFilteredProductsDiv = "";
 
             for(var i = 0; i < ajLocalProducts.length; i++) {
                 var jProduct = ajLocalProducts[i];
                 var sProductName = jProduct.productName.toLowerCase();
                 if(sProductName.indexOf(sSearchBarValue) != -1){
-                    sFitleredProductsDiv += generateProductDiv(jProduct);
+                    sFilteredProductsDiv += generateProductDiv(jProduct);
                 }
             }
-            productsContent.innerHTML = sFitleredProductsDiv;
+            productsContent.innerHTML = sFilteredProductsDiv;
         });
 
         if(jMyUser.admin) {
@@ -363,10 +315,10 @@ else
     }
 
     function getAddProductsButton(callback) {
-        var addProductsButtonDiv = "<div class='col-md-12'>\
-                <button class='btn btn-success btnPages' data-page='getPageAddProduct'>Add product</button>\
+        var sAddProductsButtonDiv = "<div class='col-md-12'>\
+                <button class='btn btn-success btnPages' data-function='getPageAddProduct'>Add product</button>\
                </div>";
-        callback(addProductsButtonDiv);
+        callback(sAddProductsButtonDiv);
     }
 
     function getPageAddProduct(callback) {
@@ -391,10 +343,10 @@ else
                    <input type="file" class="form-control" name="fileProductPicture">\
                </div>\
                <div class="form-group" style="text-align: center">\
-                   <button class="btn btn-primary btnPages" type="button" data-page="saveProduct">Save product</button>\
+                   <button class="btn btn-primary btnPages" type="button" data-function="saveProduct">Save product</button>\
                </div>\
            </form>\
-       </div>\
+        </div>\
        </div>';
        callback(sDivAddProduct);
     }
@@ -440,25 +392,21 @@ else
                   <div id="productOptions" data-id="'+jProduct.id+'">';
 
         if(!jMyUser.admin) {
-            sProductDiv += '<button class="btn btn-sm btn-success btnCrudPages" data-location="productsPage" data-page="buyProduct">Add to basket</button>';
+            sProductDiv += '<button class="btn btn-sm btn-success btnCrudPages" data-location="productsPage" data-function="buyProduct">Add to basket</button>';
         }
 
-        sProductDiv += ' <button class="btn btn-sm btn-primary btnCrudPages" data-page="getProductPage">Show more</button></div></div>';
+        sProductDiv += ' <button class="btn btn-sm btn-primary btnCrudPages" data-function="getProductPage">Show more</button></div></div>';
         return sProductDiv;
     }
 
     function updateLocalProductList() {
-
         doAjax({"method":"GET","url":"api/product/get-products.php"}, function (products) {
             ajLocalProducts = JSON.parse(products);
         });
+    }
 
-        }
-
-    function buyProduct(sId, callback ) {
-        console.log(sId);
+    function buyProduct(sId, callback) {
         var aQuantityElements = document.querySelectorAll(".productQuantity");
-        //[{"id":"59cf83eb0c645","productName":"new ashss22","productPrice":"101\u20ac","quantity":"73","picture":"Pictures\/nikeshoe.jpg"}]
 
         var formData = new FormData();
         formData.append('txtProductId', sId);
@@ -467,6 +415,8 @@ else
             "url" : "api/product/update-quantity.php",
             "formData" : formData
         }
+
+
         doAjax(jAjaxData, function(data){
             if(data) {
                 var jBoughtItem = JSON.parse(data);
@@ -500,8 +450,8 @@ else
     function getProductPage(sId, callback) {
         doAjax({"method":"GET","url":"api/product/get-product.php/?id=" + sId}, function (product) {
             var jProduct = JSON.parse(product);
-            var productPageMainInfo = getProductPageMainInfo(jProduct);
-            callback(productPageMainInfo);
+            var sProductPageMainInfo = getProductPageMainInfo(jProduct);
+            callback(sProductPageMainInfo);
             productOptions.innerHTML = getProductPageOptions(jProduct, jMyUser);
         });
     }
@@ -542,34 +492,37 @@ else
     }
 
     function getProductPageOptions(jProduct, jUser) {
-        var productOptions = "";
+        var sProductOptions = "";
         jUser.admin ?
-            productOptions =
+            sProductOptions =
             '<div class="col-md-12">\
                  <div class="row" style="margin-top: 10px">\
-                  <button class="col-md-3 btn btn-secondary btnEdit" data-api="edit-product" data-id="'+jProduct.id+'" data-method="changeToEditMode">Edit</button>\
-                  <button class="col-md-3 btn btn-danger btnDelete" data-api="delete-product" data-method="deleteObject" data-id="'+jProduct.id+'">Delete</button>\
+                  <button class="col-md-3 btn btn-secondary btnEdit" data-api="edit-product" data-id="'+jProduct.id+'" data-function="changeToEditMode">Edit</button>\
+                  <button class="col-md-3 btn btn-danger btnDelete" data-api="delete-product" data-function="deleteObject" data-id="'+jProduct.id+'">Delete</button>\
                 </div>\
              </div>' :
-            productOptions =
+            sProductOptions =
                 '<div class="col-md-12">\
                       <div class="row" style="margin-top: 10px" data-id="'+jProduct.id+'">\
-                          <button class="col-md-6 btn btn-success btnCrudPages" data-location="productPage" data-page="buyProduct">Add to basket</button>\
+                          <button class="col-md-6 btn btn-success btnCrudPages" data-location="productPage" data-function="buyProduct">Add to basket</button>\
                        </div>\
                  </div>';
 
-        return productOptions;
+        return sProductOptions;
     }
 
     function deleteObject(sId, sApi, callback){
+        console.log(sId);
+        console.log(sApi);
+        console.log("her");
         var sApiDirectory = sApi.split('-')[1];
         var sObjectUpper = sApiDirectory.charAt(0).toUpperCase() + sApiDirectory.slice(1);
         var sFunctionToCall = "getPage" + sObjectUpper + "s";
-        var url = "api/"+sApiDirectory+"/"+sApi+".php/?id="+sId;
+        var sUrl = "api/"+sApiDirectory+"/"+sApi+".php/?id="+sId;
 
         var jAjaxData = {
             "method" : "GET",
-            "url" : url
+            "url" : sUrl
         }
         doAjax(jAjaxData,function(){
             if(sId == jMyUser.id) {
@@ -583,18 +536,14 @@ else
                 });
             }
             });
-
-
     }
 
     function getPageMyUser(callback){
         callback(generateUserProfileContent(jMyUser));
         userOptions.innerHTML = getProfilePageOptions(jMyUser);
-
     }
 
     function getUserPage(sId, callback) {
-
         if(jMyUser.id == sId) {
             callback(generateUserProfileContent(jMyUser));
             userOptions.innerHTML = getProfilePageOptions(jMyUser);
@@ -651,51 +600,51 @@ else
     function getProfilePageOptions(jUser) {
         return  '<div class="col-md-12">\
                     <div class="row" style="margin-top: 10px">\
-                        <button class="col-md-3 btn btn-secondary btnEdit" data-api="edit-user" data-id="'+jUser.id+'" data-method="changeToEditMode">Edit</button>\
-                        <button class="col-md-3 btn btn-danger btnDelete" data-api="delete-user" data-method="deleteObject" data-id="'+jUser.id+'">Delete</button>\
+                        <button class="col-md-3 btn btn-secondary btnEdit" data-api="edit-user" data-id="'+jUser.id+'" data-function="changeToEditMode">Edit</button>\
+                        <button class="col-md-3 btn btn-danger btnDelete" data-api="delete-user" data-function="deleteObject" data-id="'+jUser.id+'">Delete</button>\
                     </div>\
                 </div>'
     }
 
 
-    function changeToEditMode(btn, editableInfo) {
-        for(var i = 0; i < editableInfo.length; i++) {
-            var editableElement = editableInfo[i];
-            var editableElementValue = editableElement.innerHTML;
+    function changeToEditMode(btnEdit, aEditableInfo) {
+        for(var i = 0; i < aEditableInfo.length; i++) {
+            var editableElement = aEditableInfo[i];
+            var sEditableElementValue = editableElement.innerHTML;
             var editableElementParent = editableElement.parentNode;
-            var editableElementId = editableElement.getAttribute('id');
-            var inputField = '<input type="text" id="'+editableElementId+'" class="edit-textfield" value="'+editableElementValue+'">';
+            var sEditableElementId = editableElement.getAttribute('id');
+            var inputFieldElement = '<input type="text" id="'+sEditableElementId+'" class="edit-textfield" value="'+sEditableElementValue+'">';
             editableElement.remove();
-            editableElementParent.innerHTML = inputField;
+            editableElementParent.innerHTML = inputFieldElement;
         }
-        var dataId = btn.getAttribute('data-id');
-        var sApi = btn.getAttribute('data-api');
-        var updateBtn = '<button type="button" class="btn btn-sm btn-primary btnUpdate" data-api="'+sApi+'" data-id="'+dataId+'" data-method="updateObject">Save changes</button>';
-        var editButtonParentNode = btn.parentNode;
-        btn.remove();
-        editButtonParentNode.insertAdjacentHTML("afterbegin", updateBtn);
+        var sDataId = btnEdit.getAttribute('data-id');
+        var sApi = btnEdit.getAttribute('data-api');
+        var btnUpdate = '<button type="button" class="btn btn-sm btn-primary btnUpdate" data-api="'+sApi+'" data-id="'+sDataId+'" data-function="updateObject">Save changes</button>';
+        var btnUpdateParentNode = btnEdit.parentNode;
+        btnEdit.remove();
+        btnUpdateParentNode.insertAdjacentHTML("afterbegin", btnUpdate);
     }
 
-    function updateObject(btn, editTextFields, callback) {
+    function updateObject(btnUpdate, aEditTextFields, callback) {
         var formData = new FormData();
-        var btnDataId = btn.getAttribute('data-id');
-        var sApi = btn.getAttribute('data-api');
+        var btnUpdateDataId = btnUpdate.getAttribute('data-id');
+        var sApi = btnUpdate.getAttribute('data-api');
         var sApiDirectory = sApi.split('-')[1];
         var sObjectUpper = sApiDirectory.charAt(0).toUpperCase() + sApiDirectory.slice(1);
         var sFunctionToCall = "get"+sObjectUpper+"Page";
-        var url = "api/" + sApiDirectory + "/" + sApi  + ".php";
+        var sUrl = "api/" + sApiDirectory + "/" + sApi  + ".php";
 
-        for(var i = 0; i < editTextFields.length; i++) {
-            var currentField = editTextFields[i];
+        for(var i = 0; i < aEditTextFields.length; i++) {
+            var currentField = aEditTextFields[i];
             var key = currentField.getAttribute('id');
             var value = currentField.value;
             formData.append(key, value);
         }
-        formData.append('id', btnDataId);
+        formData.append('id', btnUpdateDataId);
 
         var jAjaxData = {
             "method" : "POST",
-            "url" : url,
+            "url" : sUrl,
             "formData" : formData
         }
 
@@ -705,7 +654,7 @@ else
             if(jData.updateSession) {
                 jMyUser = jData.jUser;
             }
-            window[sFunctionToCall](btnDataId, function(data){
+            window[sFunctionToCall](btnUpdateDataId, function(data){
                 callback(data);
             });
         });
@@ -733,47 +682,44 @@ else
         }
     }
 
-
-
     var jMarkerPos = {};
     var markers = [];
     var mainMap;
 
     function getGoogleMaps(callback){
         if(jMyUser.admin) {
-        doAjax({"method":"GET","url":"api/subscribe/get-subscribers.php"},function(subscribers){
-            var jAjaxData = {
-                "method":"GET",
-                "url":"api/user/get-users.php?id="+jMyUser.id
-            };
-            doAjax(jAjaxData, function(sajUsers){
-            var ajUsers = JSON.parse(sajUsers);
-            navigator.geolocation.getCurrentPosition(function(position){
-                initMap(position, function(){
-                    //Her når vi til når geolocation og kortet er loadet.
-                    var ajSubscribers = JSON.parse(subscribers);
-                    for(var i = 0; i < ajSubscribers.length; i++){
+            doAjax({"method":"GET","url":"api/subscribe/get-subscribers.php"},function(subscribers){
+                var jAjaxData = {
+                    "method":"GET",
+                    "url":"api/user/get-users.php?id="+jMyUser.id
+                };
 
-                        var jSubscriberPosition =
+            doAjax(jAjaxData, function(sajUsers) {
+                var ajUsers = JSON.parse(sajUsers);
+                navigator.geolocation.getCurrentPosition(function(position){
+                    initMap(position, function(){
+
+                        //Her når vi til når geolocation og kortet er loadet.
+                        var ajSubscribers = JSON.parse(subscribers);
+                        for(var i = 0; i < ajSubscribers.length; i++) {
+                            var jSubscriberPosition =
                             {
                                 lat: Number(ajSubscribers[i].latitude),
                                 lng: Number(ajSubscribers[i].longtitude)
                             };
-                        var sSubscriberId = ajSubscribers[i].userId;
-                        for(var j = 0; j < ajUsers.length; j++) {
-                            if(sSubscriberId == ajUsers[j].id) {
-                                createNewMarker(jSubscriberPosition, ajUsers[j]);
-                                break;
+
+                            var sSubscriberId = ajSubscribers[i].userId;
+                            for(var j = 0; j < ajUsers.length; j++) {
+                                if(sSubscriberId == ajUsers[j].id) {
+                                    createNewMarker(jSubscriberPosition, ajUsers[j]);
+                                    break;
+                                    }
+                                }
                             }
-                        }
-
-
-                    }
+                        });
+                    });
                 });
             });
-
-        });
-        });
         }
         else {
             navigator.geolocation.getCurrentPosition(function(position) {
@@ -783,7 +729,7 @@ else
             });
         }
         var sSubscribtionDiv = '<form id="frmSubscribe">\
-                        <button class="btn btn-success btnPages" type="button" data-page="doSubscribtion">Subscribe!</button>\
+                        <button class="btn btn-success btnPages" type="button" data-function="doSubscription">Subscribe!</button>\
                     </form>';
 
         callback("<h1>Choose your location on the map and click subscribe!</h1><div id='map'></div>" + sSubscribtionDiv);
@@ -811,7 +757,7 @@ else
         markers.push(subscriberMarker);
     }
 
-    function doSubscribtion(callback){
+    function doSubscription(callback){
 
         var formData = new FormData(frmSubscribe);
         formData.append('txtUserId',jMyUser.id);
@@ -826,13 +772,13 @@ else
 
     function initMap(position, callback) {
 
-        var currentLng = position.coords.longitude;
-        var currentLat = position.coords.latitude;
+        var sCurrentLng = position.coords.longitude;
+        var sCurrentLat = position.coords.latitude;
 
-        var uluru = {lat: currentLat, lng: currentLng};
+        var jCurrentLocation = {lat: sCurrentLat, lng: sCurrentLng};
         var map = new google.maps.Map(document.getElementById('map'), {
             zoom: 12,
-            center: uluru
+            center: jCurrentLocation
         });
         mainMap = map;
         var marker = new google.maps.Marker({
@@ -842,7 +788,6 @@ else
         map.addListener('click', function (e) {
             jMarkerPos.lng = e.latLng.lng();
             jMarkerPos.lat = e.latLng.lat();
-            console.log(jMarkerPos);
             marker.setPosition(jMarkerPos);
         });
         callback();
@@ -871,20 +816,20 @@ else
 
         var sNavbarLogout =
             '<li class="nav-item">\ \
-                <a class="nav-link btnPages" data-page="getPageMyUser">My User</a>\            \
+                <a class="nav-link btnPages" data-function="getPageMyUser">'+jMyUser.firstName+'</a>\            \
              </li>\
              <li class="nav-item">\
-                <a class="nav-link btnPages" data-page="getPageLogout">Logout</a>\
+                <a class="nav-link btnPages" data-function="getPageLogout">Logout</a>\
             </li>';
         var sNavbarMain =
             '<li class="nav-item">\
-                <a class="nav-link btnPages" data-page="getGoogleMaps">Maps</a>\
+                <a class="nav-link btnPages" data-function="getGoogleMaps">Maps</a>\
                 </li>\
                 <li class="nav-item">\
-                <a class="nav-link btnPages" data-page="getPageProducts">Products</a>\
+                <a class="nav-link btnPages" data-function="getPageProducts">Products</a>\
                 </li>\
                 <li class="nav-item">\
-                <a class="nav-link btnPages" data-page="getPageUsers">Users</a>\
+                <a class="nav-link btnPages" data-function="getPageUsers">Users</a>\
             </li>';
 
         navLogin.insertAdjacentHTML('beforeend',sNavbarLogout);
@@ -895,7 +840,7 @@ else
         navLogin.innerHTML = "";
 
         sNavbar = '<li class="nav-item">\
-            <a class="nav-link btnPages" data-page="getPageLogin">Login</a>\
+            <a class="nav-link btnPages" data-function="getPageLogin">Login</a>\
             </li>';
         navLogin.insertAdjacentHTML("beforeend",sNavbar);
     }
