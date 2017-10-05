@@ -408,18 +408,21 @@ else
     }
 
     function generateProductDiv(jProduct) {
-        return '<div class="card">\
+        var sProductDiv = '<div class="card">\
                   <img width="250px" height="250px" src="'+jProduct.picture+'">\
                   <div id="productInfoDiv">\
                     <div><span>Name: </span><span>'+jProduct.productName+'</span></div>\
                     <div><span>Price: </span><span>'+jProduct.productPrice+'</span></div>\
                     <div><span>Quantity: </span><span class="productQuantity" data-id="'+jProduct.id+'">'+jProduct.quantity+'</span></div>\
                   </div>\
-                  <div id="productOptions" data-id="'+jProduct.id+'">\
-                    <button class="btn btn-sm btn-success btnCrudPages" data-location="productsPage" data-page="buyProduct">Add to basket</button>\
-                    <button class="btn btn-sm btn-primary btnCrudPages" data-page="getProductPage">Show more</button>\
-                  </div>\
-                </div>';
+                  <div id="productOptions" data-id="'+jProduct.id+'">';
+
+        if(!jMyUser.admin) {
+            sProductDiv += '<button class="btn btn-sm btn-success btnCrudPages" data-location="productsPage" data-page="buyProduct">Add to basket</button>';
+        }
+
+        sProductDiv += ' <button class="btn btn-sm btn-primary btnCrudPages" data-page="getProductPage">Show more</button></div></div>';
+        return sProductDiv;
     }
 
     function buyProduct(sId, callback ) {
