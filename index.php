@@ -366,7 +366,7 @@ else
         var addProductsButtonDiv = "<div class='col-md-12'>\
                 <button class='btn btn-success btnPages' data-page='getPageAddProduct'>Add product</button>\
                </div>";
-        callback(addProductsButtonDiv)
+        callback(addProductsButtonDiv);
     }
 
     function getPageAddProduct(callback) {
@@ -444,6 +444,14 @@ else
                 </div>';
     }
 
+    function updateLocalProductList() {
+
+        doAjax({"method":"GET","url":"api/product/get-products.php"}, function (products) {
+            ajLocalProducts = JSON.parse(products);
+        });
+
+        }
+
     function buyProduct(sId, callback ) {
         console.log(sId);
         var aQuantityElements = document.querySelectorAll(".productQuantity");
@@ -461,7 +469,8 @@ else
                 var jBoughtItem = JSON.parse(data);
                 displayNotification(jBoughtItem.picture, "You have bought: "+jBoughtItem.productName, "Congratulations");
                 playSound('Sounds/purchase_success.mp3');
-                decrementQuantityinHTML(jBoughtItem.id, aQuantityElements)
+                decrementQuantityinHTML(jBoughtItem.id, aQuantityElements);
+                updateLocalProductList();
             }
             else {
                 playSound('Sounds/purchase_error.mp3');
