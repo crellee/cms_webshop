@@ -83,13 +83,15 @@ else
     var jMyUser = <?php echo json_encode($jMyUser) ?>;
     var bIsLoggedIn = <?php echo json_encode($bLoggedIn)?>;
 
+    var ajLocalProducts = null;
+
     console.log(jMyUser);
     console.log(bIsLoggedIn);
 
     (function(){
         getHomePage(function (homePageDiv) {
             parentDiv.innerHTML = homePageDiv;
-        })
+        });
         if(bIsLoggedIn){
             getLoggedInNavbar();
         }
@@ -326,12 +328,30 @@ else
                     "<div class='container'>\
                         <div class='row' id='adminOptions' style='margin-bottom: 10px; margin-top: 10px'>\
                         </div>\
+                        <div class='row'>\
+                        <input id='txtSearchBar' class='form-control col-md-6' name='search' placeholder='Search Here' autocomplete='off' autofocus='autofocus' type='text'>\
+                        </div>\
                         <div class='row' id='productsContent'>\
                         </div>\
                         <div class=row'>\
                         </div>";
 
         callback(productsBody);
+
+        txtSearchBar.addEventListener('input',function(){
+            var sSearchBarValue = txtSearchBar.value.toLowerCase();
+            var sFitleredProductsDiv = "";
+
+            for(var i = 0; i < ajLocalProducts.length; i++) {
+                var jProduct = ajLocalProducts[i];
+                var sProductName = jProduct.productName.toLowerCase();
+                if(sProductName.indexOf(sSearchBarValue) != -1){
+                    sFitleredProductsDiv += generateProductDiv(jProduct);
+                }
+            }
+            productsContent.innerHTML = sFitleredProductsDiv;
+        });
+
         if(jMyUser.admin) {
             getAddProductsButton(function (btnAddProductsDiv) {
                 adminOptions.innerHTML = btnAddProductsDiv;
@@ -346,7 +366,7 @@ else
         var addProductsButtonDiv = "<div class='col-md-12'>\
                 <button class='btn btn-success btnPages' data-page='getPageAddProduct'>Add product</button>\
                </div>";
-        callback(addProductsButtonDiv)
+        callback(addProductsButtonDiv);
     }
 
     function getPageAddProduct(callback) {
@@ -395,9 +415,11 @@ else
         });
     }
 
+
     function getProductElements(callback) {
         doAjax({"method":"GET","url":"api/product/get-products.php"}, function (products) {
             var ajProducts = JSON.parse(products);
+            ajLocalProducts = ajProducts;
             var sProductDivs = "";
             for(var i = 0; i < ajProducts.length; i++) {
                 var jProduct = ajProducts[i];
@@ -425,6 +447,14 @@ else
         return sProductDiv;
     }
 
+    function updateLocalProductList() {
+
+        doAjax({"method":"GET","url":"api/product/get-products.php"}, function (products) {
+            ajLocalProducts = JSON.parse(products);
+        });
+
+        }
+
     function buyProduct(sId, callback ) {
         console.log(sId);
         var aQuantityElements = document.querySelectorAll(".productQuantity");
@@ -442,7 +472,8 @@ else
                 var jBoughtItem = JSON.parse(data);
                 displayNotification(jBoughtItem.picture, "You have bought: "+jBoughtItem.productName, "Congratulations");
                 playSound('Sounds/purchase_success.mp3');
-                decrementQuantityinHTML(jBoughtItem.id, aQuantityElements)
+                decrementQuantityinHTML(jBoughtItem.id, aQuantityElements);
+                updateLocalProductList();
             }
             else {
                 playSound('Sounds/purchase_error.mp3');
